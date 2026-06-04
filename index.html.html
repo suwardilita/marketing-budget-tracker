@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Budget Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#F7F6F2;--surface:#FFFFFF;--border:#E4E2DA;--border-strong:#C8C5BB;
+  --text:#1A1916;--text-2:#6B6860;--text-3:#9E9C97;
+  --radius:10px;--radius-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:232px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{flex:1;min-width:0;padding:2rem 2.5rem}
+.brand-logo{padding:1.4rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.logo-mark{width:34px;height:34px;background:var(--text);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.logo-mark svg{width:18px;height:18px;fill:white}
+.brand-logo h1{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;letter-spacing:-.2px}
+.brand-logo p{font-size:11px;color:var(--text-3);margin-top:2px}
+.nav{padding:1rem .75rem;flex:1}
+.nav-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:0 .5rem;margin-bottom:4px;margin-top:12px}
+.nav-label:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{background:var(--text);color:#fff}
+.upload-zone{margin:.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);padding:1rem;background:var(--bg)}
+.uz-label{font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.upload-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .15s;font-family:inherit;margin-bottom:6px}
+.upload-btn:last-of-type{margin-bottom:0}
+.upload-btn:hover{border-color:var(--text);color:var(--text)}
+.upload-btn.uploaded{border-color:#4F6A57;color:#2D3D30;background:#EEF2EF}
+.upload-btn.loading{border-color:#946B00;color:#946B00;background:#FDF6E0}
+.upload-btn svg{width:14px;height:14px;flex-shrink:0}
+.upload-btn input{display:none}
+.uz-filename{font-size:10px;color:var(--text-3);margin-top:3px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-header{margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.page-header-left .page-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.page-header-left .page-sub{font-size:13px;color:var(--text-2);margin-top:4px}
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-bar select{font-family:inherit;font-size:13px;font-weight:500;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.filter-bar select:hover{border-color:var(--border-strong)}
+.scards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem}
+.sc-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sc-value{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.5px;line-height:1}
+.sc-value.danger{color:#C0392B}.sc-value.warn{color:#946B00}.sc-value.ok{color:#2D6A4F}.sc-value.spent{color:#D35400}
+.brand-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.brand-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.brand-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.02em}
+.brand-stats{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:10px}
+.brand-stats strong{color:var(--text);font-weight:600}
+.status-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.s-ok{background:#EEF4EB;color:#2D6A4F}
+.s-warn{background:#FDF6E0;color:#946B00}
+.s-spent{background:#FDEBD0;color:#D35400}
+.s-over{background:#FDECEC;color:#C0392B}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg);text-align:left;white-space:nowrap}
+th.nr{text-align:right}
+td{padding:7px 14px;border-top:1px solid var(--border);color:var(--text);vertical-align:middle}
+td.nr{text-align:right;font-variant-numeric:tabular-nums}
+td.muted{color:var(--text-3);font-size:12px}
+tbody tr:hover td{background:#FAFAF8}
+.tfoot td{background:var(--bg);font-weight:600;border-top:2px solid var(--border)}
+.bar-bg{height:5px;background:var(--border);border-radius:3px;min-width:64px}
+.bar-fill{height:5px;border-radius:3px;transition:width .4s}
+.budget-input{width:100%;text-align:right;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-variant-numeric:tabular-nums;border:1px solid transparent;border-radius:4px;padding:3px 6px;background:transparent;color:var(--text);outline:none;cursor:pointer}
+.budget-input:hover{border-color:var(--border);background:var(--surface)}
+.budget-input:focus{border-color:#3D5AFE;background:var(--surface);box-shadow:0 0 0 2px rgba(61,90,254,.12);cursor:text}
+.budget-input.edited{color:#3D5AFE;font-weight:600}
+.reset-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#946B00;background:#FDF6E0;border:1px solid #f0d97a;border-radius:20px;padding:1px 7px;cursor:pointer;white-space:nowrap;margin-top:3px}
+.reset-pill:hover{background:#f5e99a}
+.amt-input{width:110px;text-align:right;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-variant-numeric:tabular-nums;border:1px solid var(--border);border-radius:4px;padding:3px 6px;background:var(--surface);color:var(--text);outline:none}
+.amt-input:focus{border-color:#3D5AFE;box-shadow:0 0 0 2px rgba(61,90,254,.12)}
+.note-input{width:100%;min-width:120px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;border:1px solid var(--border);border-radius:4px;padding:3px 6px;background:var(--surface);color:var(--text);outline:none}
+.note-input:focus{border-color:#3D5AFE;box-shadow:0 0 0 2px rgba(61,90,254,.12)}
+.del-row-btn{padding:3px 8px;font-size:11px;font-weight:600;border-radius:var(--radius-sm);border:1px solid #FDECEC;background:#FDECEC;color:#C0392B;cursor:pointer;font-family:inherit}
+.del-row-btn:hover{background:#fad7d7}
+.gen-notice{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:#EAEDFF;border:1px solid #c5cbfa;border-radius:var(--radius);margin-bottom:1.25rem;font-size:13px;color:#1A2AB0}
+.gen-notice svg{width:16px;height:16px;flex-shrink:0;margin-top:1px}
+.preview-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.preview-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:600;padding:9px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s}
+.dl-btn:hover{background:var(--bg)}
+.dl-btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+.dl-btn.primary:hover{background:#333}
+.dl-btn svg{width:15px;height:15px}
+.empty{text-align:center;padding:4rem 2rem;color:var(--text-3)}
+.empty svg{width:40px;height:40px;margin:0 auto 12px;display:block;opacity:.35}
+.empty p{font-size:14px}
+.panel{display:none}.panel.active{display:block}
+.row-header td{background:#FAFAF8;font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;border-top:2px solid var(--border)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}.toast.err{background:#C0392B}
+.syncing{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);padding:4px 0}
+.spin{animation:spin .8s linear infinite;width:12px;height:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.setup-banner{background:#EAEDFF;border:1px solid #c5cbfa;border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem}
+.setup-banner h3{font-size:14px;font-weight:700;color:#1A2AB0;margin-bottom:6px}
+.setup-banner p{font-size:13px;color:#1A2AB0;margin-bottom:10px;line-height:1.5}
+.setup-banner input{width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid #c5cbfa;background:#fff;color:var(--text);outline:none;margin-bottom:8px}
+.setup-banner input:focus{border-color:#3D5AFE}
+.setup-banner button{font-family:inherit;font-size:13px;font-weight:600;padding:7px 16px;border-radius:var(--radius-sm);border:none;background:#3D5AFE;color:#fff;cursor:pointer}
+.setup-banner button:hover{background:#1A2AB0}
+.connected-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#2D6A4F;background:#EEF4EB;border:1px solid #b7ddb7;border-radius:20px;padding:3px 10px}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 3h2v-2h2v2h2v2h-2v2h-2v-2h-2z"/></svg></div>
+    <h1>Marketing Budget</h1><p>Tracker v1.0</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Views</div>
+    <button class="nav-item active" onclick="showPanel('recap',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Budget recap
+    </button>
+    <button class="nav-item" onclick="showPanel('log',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Budget details
+    </button>
+    <div class="nav-label">Export</div>
+    <button class="nav-item" onclick="showPanel('pp',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Pesanan Pembelian
+    </button>
+    <button class="nav-item" onclick="showPanel('pb',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Pencatatan Beban
+    </button>
+  </nav>
+  <div class="upload-zone">
+    <div class="uz-label">Upload files</div>
+    <label class="upload-btn" id="btn-budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span id="lbl-budget">Monthly budget</span>
+      <input type="file" accept=".xlsx,.xls" onchange="loadBudget(this)">
+    </label>
+    <div class="uz-filename" id="fn-budget"></div>
+    <label class="upload-btn" id="btn-txn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span id="lbl-txn">Budget request list</span>
+      <input type="file" accept=".xlsx,.xls" onchange="loadTxn(this)">
+    </label>
+    <div class="uz-filename" id="fn-txn"></div>
+  </div>
+  <div style="padding:.75rem;border-top:1px solid var(--border)">
+    <div id="sync-status" class="syncing" style="display:none">
+      <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>Syncing…
+    </div>
+    <div id="connected-badge" style="display:none">
+      <span class="connected-badge"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#2D6A4F"/></svg>Connected to Sheets</span>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- RECAP -->
+  <div id="panel-recap" class="panel active">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-title">Budget recap</div>
+        <div class="page-sub">Budget vs actual per brand &amp; COA. Click any budget number to edit inline.</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <select id="r-month" onchange="renderRecap()"><option value="">All months</option></select>
+      <select id="r-brand" onchange="renderRecap()"><option value="">All brands</option></select>
+      <button class="dl-btn" onclick="downloadRecap()" style="margin-left:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download recap
+      </button>
+    </div>
+    <div id="recap-content">
+      <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><p>Upload the monthly budget file to get started</p></div>
+    </div>
+  </div>
+
+  <!-- BUDGET DETAILS -->
+  <div id="panel-log" class="panel">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-title">Budget details</div>
+        <div class="page-sub">All transactions. Edit amounts, add notes, or delete rows. Changes affect the recap but not export templates.</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <select id="l-month" onchange="renderLog()"><option value="">All months</option></select>
+      <select id="l-brand" onchange="renderLog()"><option value="">All brands</option></select>
+      <select id="l-type" onchange="renderLog()"><option value="">All types</option><option value="PP">Pesanan Pembelian</option><option value="PB">Pencatatan Beban</option></select>
+      <button class="dl-btn" onclick="downloadDetails()" style="margin-left:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download details
+      </button>
+    </div>
+    <div id="log-content">
+      <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>No transactions yet. Upload a budget request list to begin.</p></div>
+    </div>
+  </div>
+
+  <!-- PP -->
+  <div id="panel-pp" class="panel">
+    <div class="page-header"><div class="page-header-left"><div class="page-title">Pesanan Pembelian template</div><div class="page-sub">From the most recently uploaded budget request list. Download and import into Accurate Online.</div></div></div>
+    <div id="pp-content"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Upload a budget request list to generate this template</p></div></div>
+  </div>
+
+  <!-- PB -->
+  <div id="panel-pb" class="panel">
+    <div class="page-header"><div class="page-header-left"><div class="page-title">Pencatatan Beban template</div><div class="page-sub">From the most recently uploaded budget request list. Download and import into Accurate Online.</div></div></div>
+    <div id="pb-content"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Upload a budget request list to generate this template</p></div></div>
+  </div>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- GOOGLE SHEETS URL SETUP MODAL -->
+<div id="setup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:8px">Connect to Google Sheets</h2>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">Paste your Google Apps Script web app URL below. This connects all team members to the same shared database. See the setup guide for instructions.</p>
+    <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;margin-bottom:12px">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeSetup()" style="font-family:inherit;font-size:13px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer">Cancel</button>
+      <button onclick="saveSheetUrl()" style="font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);border:none;background:#3D5AFE;color:#fff;cursor:pointer">Connect</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const BRANDS={
+  'BELLAMYS ORGANIC':          {c:'#4F6A57',bg:'#EEF2EF',txt:'#2D3D30'},
+  'COMVITA':                   {c:'#3D5AFE',bg:'#EAEDFF',txt:'#1A2AB0'},
+  'KUVINGS':                   {c:'#FF6B2C',bg:'#FFF0EA',txt:'#8B3610'},
+  'NOW SUPPLEMENT':            {c:'#7A9E6E',bg:'#EEF4EB',txt:'#3A5930'},
+  'NOW SUPPLEMENT (NON BPOM)':{c:'#9B7EC8',bg:'#F3EEFB',txt:'#4D2D8A'},
+  'NUTRIBULLET':               {c:'#7A2E3A',bg:'#F7EAEC',txt:'#4D1520'},
+};
+function bs(name){return BRANDS[name]||{c:'#888',bg:'#F5F5F5',txt:'#333'}}
+const TAX_COAS=new Set(['111901201','111901202','211601101','211601102','211601103']);
+function isTax(coa){return TAX_COAS.has(String(coa).trim())}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let budgetRows=[], cumulLog=[], latestPP=[], latestPB=[], budgetOverrides={};
+let SHEET_URL = localStorage.getItem('mbt_sheet_url')||'';
+
+// ── Date helpers ──────────────────────────────────────────────────────────
+// Excel epoch fix: Dec 30 1899 (accounts for Excel's 1900 leap year bug)
+function excelSerialToDate(serial){
+  if(typeof serial!=='number') return null;
+  const epoch=new Date(Date.UTC(1899,11,30));
+  return new Date(epoch.getTime()+serial*86400000);
+}
+function toMonthKey(v){
+  if(!v&&v!==0) return '';
+  if(v instanceof Date){
+    if(isNaN(v.getTime())) return '';
+    return v.getUTCFullYear()+'-'+String(v.getUTCMonth()+1).padStart(2,'0');
+  }
+  if(typeof v==='number'){
+    const d=excelSerialToDate(v); if(!d) return '';
+    return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+  }
+  const s=String(v), m=s.match(/(\d{4})[-\/](\d{1,2})/);
+  return m?m[1]+'-'+m[2].padStart(2,'0'):'';
+}
+function fmtDate(v){
+  if(!v) return '';
+  if(typeof v==='number'){
+    const d=excelSerialToDate(v); if(!d) return '';
+    return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear();
+  }
+  if(v instanceof Date){
+    if(isNaN(v.getTime())) return '';
+    return String(v.getUTCDate()).padStart(2,'0')+'/'+String(v.getUTCMonth()+1).padStart(2,'0')+'/'+v.getUTCFullYear();
+  }
+  const s=String(v), m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m?m[3]+'/'+m[2]+'/'+m[1]:s.slice(0,10);
+}
+function fmtMonth(key){
+  if(!key) return '';
+  const[y,mo]=key.split('-');
+  return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1]+' '+y;
+}
+function fmt(n){if(n===null||n===undefined||n==='')return'–';return Math.round(Number(n)).toLocaleString('id-ID')}
+function pct(a,b){return b?Math.round(a/b*100):null}
+function scClass(p){
+  if(p===null) return 'ok';
+  if(p>100) return 'over';
+  if(p===100) return 'spent';
+  if(p>=80) return 'warn';
+  return 'ok';
+}
+function scLabel(p){
+  if(p===null) return '–';
+  if(p>100) return 'Over';
+  if(p===100) return 'Spent';
+  if(p>=80) return 'Near';
+  return 'OK';
+}
+function parseNum(v){if(typeof v==='number')return v;return parseFloat(String(v||'').replace(/[^0-9.\-]/g,''))||0}
+function findCol(headers,...terms){
+  for(const t of terms){
+    const key=t.toLowerCase().replace(/[\s\/\.\(\)]/g,'');
+    const found=headers.find(h=>h.toLowerCase().replace(/[\s\/\.\(\)]/g,'').includes(key));
+    if(found) return found;
+  }return null;
+}
+function toast(msg,err=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show'+(err?' err':'');
+  clearTimeout(el._t);el._t=setTimeout(()=>{el.className='toast'},4000);
+}
+function setSyncing(on){
+  document.getElementById('sync-status').style.display=on?'flex':'none';
+}
+
+// ── Google Sheets API ─────────────────────────────────────────────────────
+function showSetup(){
+  document.getElementById('setup-modal').style.display='flex';
+  document.getElementById('sheets-url-input').value=SHEET_URL;
+}
+function closeSetup(){document.getElementById('setup-modal').style.display='none'}
+function saveSheetUrl(){
+  const url=document.getElementById('sheets-url-input').value.trim();
+  if(!url){toast('Please enter a URL',true);return}
+  SHEET_URL=url;
+  localStorage.setItem('mbt_sheet_url',url);
+  closeSetup();
+  toast('Connecting to Google Sheets…');
+  loadFromSheets();
+}
+function updateConnectionBadge(){
+  document.getElementById('connected-badge').style.display=SHEET_URL?'block':'none';
+  document.getElementById('sync-status').style.display='none';
+}
+
+async function sheetsRequest(action, payload={}){
+  if(!SHEET_URL) return null;
+  setSyncing(true);
+  try{
+    const url=SHEET_URL+'?action='+action;
+    let resp;
+    if(action==='read'){
+      resp=await fetch(url);
+    } else {
+      resp=await fetch(url,{method:'POST',body:JSON.stringify({action,...payload})});
+    }
+    const text=await resp.text();
+    const data=JSON.parse(text);
+    setSyncing(false);
+    return data;
+  }catch(e){
+    setSyncing(false);
+    console.error('Sheets error:',e);
+    toast('Sheets sync error: '+e.message,true);
+    return null;
+  }
+}
+
+async function loadFromSheets(){
+  if(!SHEET_URL){updateConnectionBadge();return}
+  setSyncing(true);
+  const data=await sheetsRequest('read');
+  if(!data){updateConnectionBadge();return}
+  if(data.budgetRows) budgetRows=data.budgetRows;
+  if(data.cumulLog) cumulLog=data.cumulLog;
+  if(data.budgetOverrides) budgetOverrides=data.budgetOverrides;
+  updateConnectionBadge();
+  refreshAll();
+  toast('Data loaded from Google Sheets');
+}
+
+async function saveToSheets(payload){
+  if(!SHEET_URL) return;
+  await sheetsRequest('write',payload);
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function showPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');
+}
+
+// ── Budget loader ─────────────────────────────────────────────────────────
+function loadBudget(input){
+  const f=input.files[0];if(!f)return;
+  if(!SHEET_URL){toast('Connect to Google Sheets first — click the ⚙ icon',true);return}
+  const rd=new FileReader();
+  rd.onload=async e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:false});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!json.length){toast('Budget file is empty',true);return}
+      const h=Object.keys(json[0]);
+      const deptC=findCol(h,'dept','department','divisi','brand');
+      const coaC=findCol(h,'coa','akun','kode');
+      const nameC=findCol(h,'coaname','nama coa','nama biaya','name');
+      const monthC=findCol(h,'month','bulan','periode');
+      const budgetC=findCol(h,'budget','anggaran','target');
+      if(!coaC||!budgetC){toast('Cannot find COA or Budget column',true);return}
+      const newMonths=new Set();
+      json.forEach(r=>{const mk=toMonthKey(r[monthC]);if(mk)newMonths.add(mk)});
+      // Clear overrides for replaced months
+      newMonths.forEach(mk=>{Object.keys(budgetOverrides).forEach(k=>{if(k.endsWith('||'+mk))delete budgetOverrides[k]})});
+      // Pivot
+      const map={},nameMap={};
+      json.forEach(r=>{
+        const dept=String(r[deptC]||'').trim().toUpperCase();
+        const coa=String(r[coaC]||'').trim();
+        const name=String(r[nameC]||'').trim();
+        const month=toMonthKey(r[monthC]);
+        const budget=parseNum(r[budgetC]);
+        if(!coa&&!budget)return;
+        const k=dept+'||'+coa+'||'+month;
+        map[k]=(map[k]||0)+budget;
+        if(!nameMap[k]&&name)nameMap[k]=name;
+      });
+      // Replace months being uploaded, keep others
+      budgetRows=budgetRows.filter(r=>!newMonths.has(r.month));
+      const newRows=Object.entries(map).map(([k,budget])=>{
+        const[dept,coa,month]=k.split('||');
+        return{dept,coa,name:nameMap[k]||'',month,budget};
+      });
+      budgetRows=[...budgetRows,...newRows];
+      document.getElementById('btn-budget').classList.add('uploaded');
+      document.getElementById('lbl-budget').textContent='✓ Monthly budget';
+      document.getElementById('fn-budget').textContent=f.name;
+      await saveToSheets({type:'budget',budgetRows,budgetOverrides});
+      toast('Budget saved — '+newRows.length+' COA lines for '+[...newMonths].map(fmtMonth).join(', '));
+      refreshAll();
+    }catch(err){toast('Budget file error: '+err.message,true);console.error(err)}
+  };rd.readAsBinaryString(f);
+}
+
+// ── Transaction loader ────────────────────────────────────────────────────
+function loadTxn(input){
+  const f=input.files[0];if(!f)return;
+  if(!SHEET_URL){toast('Connect to Google Sheets first',true);return}
+  const rd=new FileReader();
+  rd.onload=async e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:false});
+      latestPP=parsePP(wb);latestPB=parsePB(wb);
+      if(!latestPP.length&&!latestPB.length){toast('No data in PP or PB sheets',true);return}
+      const batchId=Date.now(),batchDate=new Date().toLocaleDateString('id-ID');
+      const newRows=[...latestPP,...latestPB].map(r=>({...r,batchId,batchDate,fileName:f.name,note:'',rowId:Math.random().toString(36).slice(2)}));
+      cumulLog=[...cumulLog,...newRows];
+      document.getElementById('btn-txn').classList.add('uploaded');
+      document.getElementById('lbl-txn').textContent='✓ Budget request list';
+      document.getElementById('fn-txn').textContent=f.name;
+      await saveToSheets({type:'log',cumulLog});
+      toast('Loaded '+latestPP.length+' PP + '+latestPB.length+' PB rows');
+      refreshAll();renderTemplatePP();renderTemplatePB();
+    }catch(err){toast('Request list error: '+err.message,true);console.error(err)}
+  };rd.readAsBinaryString(f);
+}
+
+function parsePP(wb){
+  const ws=wb.Sheets['Pesanan Pembelian'];if(!ws)return[];
+  const json=XLSX.utils.sheet_to_json(ws,{defval:'',cellDates:false});if(!json.length)return[];
+  const h=Object.keys(json[0]);
+  const noC=findCol(h,'no.','no'),dateC=findCol(h,'date','tanggal','tgl');
+  const pemasokC=findCol(h,'pemasok'),nmC=findCol(h,'namapemasok','nama pemasok');
+  const alamatC=findCol(h,'alamat'),coaC=findCol(h,'coa','akun');
+  const coaNmC=findCol(h,'coaname','nama coa','nama biaya');
+  const amtC=findCol(h,'amount','jumlah','nilai','total');
+  const brandC=findCol(h,'branddept','brand/dept','dept','brand','divisi');
+  const catatanC=findCol(h,'catatanbiaya','catatan biaya','catatan');
+  const ketC=findCol(h,'keterangan','ket','desc');
+  return json.map(r=>({
+    type:'PP',no:parseNum(r[noC]),date:r[dateC],
+    pemasok:String(r[pemasokC]||'').trim(),namaPemasok:String(r[nmC]||'').trim(),
+    alamat:String(r[alamatC]||'').trim(),coa:String(r[coaC]||'').trim(),
+    coaName:String(r[coaNmC]||'').trim(),amount:parseNum(r[amtC]),
+    brand:String(r[brandC]||'').trim().toUpperCase(),
+    catatan:String(r[catatanC]||'').trim(),keterangan:String(r[ketC]||'').trim(),
+    month:toMonthKey(r[dateC]),note:'',
+  })).filter(r=>r.coa||r.amount);
+}
+function parsePB(wb){
+  const ws=wb.Sheets['Pencatatan Beban'];if(!ws)return[];
+  const json=XLSX.utils.sheet_to_json(ws,{defval:'',cellDates:false});if(!json.length)return[];
+  const h=Object.keys(json[0]);
+  const noC=findCol(h,'no.','no'),tglC=findCol(h,'tanggal','date','tgl');
+  const jthC=findCol(h,'jatuhtempo','tanggal jatuh tempo','jatuh tempo');
+  const coaC=findCol(h,'coa','akun'),coaNmC=findCol(h,'coaname','nama coa','nama biaya');
+  const amtC=findCol(h,'amount','jumlah','nilai','total');
+  const brandC=findCol(h,'branddept','brand/dept','dept','brand','divisi');
+  const catC=findCol(h,'catatan','keterangan','ket');
+  const ketC=findCol(h,'keterangan','ket');
+  return json.map(r=>({
+    type:'PB',no:parseNum(r[noC]),tanggal:r[tglC],jatuhTempo:r[jthC],hutang:'211401101',
+    coa:String(r[coaC]||'').trim(),coaName:String(r[coaNmC]||'').trim(),
+    amount:parseNum(r[amtC]),brand:String(r[brandC]||'').trim().toUpperCase(),
+    catatan:String(r[catC]||'').trim(),keterangan:String(r[ketC]||'').trim(),
+    month:toMonthKey(r[tglC]),note:'',
+  })).filter(r=>r.coa||r.amount);
+}
+
+// ── Selects ───────────────────────────────────────────────────────────────
+function refreshSelects(){
+  const allM=[...new Set([...cumulLog.map(r=>r.month),...budgetRows.map(r=>r.month)].filter(Boolean))].sort();
+  const allB=[...new Set([...cumulLog.map(r=>r.brand),...budgetRows.map(r=>r.dept)].filter(Boolean))].sort();
+  ['r','l'].forEach(pfx=>{
+    const mEl=document.getElementById(pfx+'-month'),bEl=document.getElementById(pfx+'-brand');
+    const curM=mEl.value,curB=bEl.value;
+    mEl.innerHTML='<option value="">All months</option>'+allM.map(m=>`<option value="${m}"${m===curM?' selected':''}>${fmtMonth(m)}</option>`).join('');
+    bEl.innerHTML='<option value="">All brands</option>'+allB.map(b=>`<option value="${b}"${b===curB?' selected':''}>${b}</option>`).join('');
+  });
+}
+function refreshAll(){refreshSelects();renderRecap();renderLog()}
+
+// ── Recap ─────────────────────────────────────────────────────────────────
+function getBudget(dept,coa,month){
+  const k=dept+'||'+coa+'||'+month;
+  if(budgetOverrides[k]!==undefined)return{val:Number(budgetOverrides[k]),overridden:true};
+  const row=budgetRows.find(r=>r.dept===dept&&r.coa===coa&&r.month===month);
+  return{val:row?Number(row.budget):0,overridden:false};
+}
+async function onBudgetEdit(dept,coa,month,inputEl){
+  const raw=inputEl.value.replace(/\./g,'').replace(/[^0-9]/g,'');
+  const val=parseInt(raw)||0;
+  const k=dept+'||'+coa+'||'+month;
+  budgetOverrides[k]=val;
+  inputEl.classList.add('edited');
+  await saveToSheets({type:'overrides',budgetOverrides});
+  renderRecap();
+}
+async function resetBudgetOverride(dept,coa,month){
+  const k=dept+'||'+coa+'||'+month;
+  delete budgetOverrides[k];
+  await saveToSheets({type:'overrides',budgetOverrides});
+  renderRecap();toast('Budget reset to file value');
+}
+
+function renderRecap(){
+  const month=document.getElementById('r-month').value;
+  const brand=document.getElementById('r-brand').value;
+  const bRows=budgetRows.filter(r=>(!month||r.month===month||!r.month)&&(!brand||r.dept===brand));
+  const txRows=cumulLog.filter(r=>!isTax(r.coa)&&r.amount>0&&(!month||r.month===month)&&(!brand||r.brand===brand));
+  if(!bRows.length){
+    document.getElementById('recap-content').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><p>Upload the monthly budget file to get started</p></div>';return;
+  }
+  const actMap={};
+  txRows.forEach(r=>{const k=r.brand+'||'+r.coa+'||'+(r.month||'');actMap[k]=(actMap[k]||0)+Number(r.amount)});
+  const brands=[...new Set(bRows.map(r=>r.dept))].sort();
+  let tB=0,tA=0,html='';
+  brands.forEach(br=>{
+    const b=bs(br),lines=bRows.filter(r=>r.dept===br);
+    let brB=0,brA=0,trs='';
+    lines.forEach(r=>{
+      const{val:budVal,overridden}=getBudget(r.dept,r.coa,r.month);
+      const act=actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0;
+      const bal=budVal-act,p=pct(act,budVal),s=scClass(p);
+      brB+=budVal;brA+=act;
+      const dSafe=r.dept.replace(/'/g,"\\'");
+      trs+=`<tr>
+        <td class="muted">${r.coa}</td>
+        <td>${r.name||'–'}</td>
+        <td class="nr" style="padding-right:8px">
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+            <input class="budget-input${overridden?' edited':''}" type="text"
+              value="${budVal.toLocaleString('id-ID')}"
+              onchange="onBudgetEdit('${dSafe}','${r.coa}','${r.month}',this)"
+              title="Click to edit budget">
+            ${overridden?`<span class="reset-pill" onclick="resetBudgetOverride('${dSafe}','${r.coa}','${r.month}')">↺ reset</span>`:''}
+          </div>
+        </td>
+        <td class="nr" style="${act>budVal?'color:#C0392B;font-weight:600':act===0?'color:var(--text-3)':''}">${act>0?fmt(act):'–'}</td>
+        <td class="nr" style="${bal<0?'color:#C0392B;font-weight:600':''}">${fmt(bal)}</td>
+        <td class="nr" style="color:var(--text-3)">${p!==null?p+'%':'–'}</td>
+        <td style="width:90px"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(p||0,100)}%;background:${p>100?'#C0392B':p===100?'#D35400':p>=80?'#946B00':b.c}"></div></div></td>
+        <td><span class="status-pill s-${s}">${scLabel(p)}</span></td>
+      </tr>`;
+    });
+    tB+=brB;tA+=brA;
+    const brBal=brB-brA,brP=pct(brA,brB),brS=scClass(brP);
+    html+=`<div class="brand-block">
+      <div class="brand-hdr" style="background:${b.bg}">
+        <span class="brand-pill" style="background:${b.c};color:#fff">${br}</span>
+        <div class="brand-stats">Actual <strong>${fmt(brA)}</strong>&ensp;/&ensp;Budget <strong>${fmt(brB)}</strong>&emsp;<span class="status-pill s-${brS}">${brP!==null?brP+'%':'–'}</span></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th style="width:95px">COA</th><th>COA name</th>
+          <th class="nr" style="width:150px">Budget (IDR)</th>
+          <th class="nr" style="width:120px">Actual (IDR)</th>
+          <th class="nr" style="width:120px">Balance (IDR)</th>
+          <th class="nr" style="width:56px">%</th>
+          <th style="width:90px"></th><th style="width:64px">Status</th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+        <tr class="tfoot">
+          <td colspan="2">Total — ${br}</td>
+          <td class="nr">${fmt(brB)}</td>
+          <td class="nr" style="${brA>brB?'color:#C0392B':''}">${fmt(brA)}</td>
+          <td class="nr" style="${brBal<0?'color:#C0392B':''}">${fmt(brBal)}</td>
+          <td colspan="3"></td>
+        </tr>
+      </table></div>
+    </div>`;
+  });
+  const gBal=tB-tA,gP=pct(tA,tB),gS=scClass(gP);
+  document.getElementById('recap-content').innerHTML=`
+    <div class="scards">
+      <div class="scard"><div class="sc-label">Total budget</div><div class="sc-value">${fmt(tB)}</div></div>
+      <div class="scard"><div class="sc-label">Total actual</div><div class="sc-value ${gP>100?'danger':gP===100?'spent':gP>=80?'warn':''}">${fmt(tA)}</div></div>
+      <div class="scard"><div class="sc-label">Balance</div><div class="sc-value ${gBal<0?'danger':'ok'}">${fmt(gBal)}</div></div>
+      <div class="scard"><div class="sc-label">% used</div><div class="sc-value ${gS==='over'?'danger':gS==='spent'?'spent':gS==='warn'?'warn':'ok'}">${gP!==null?gP+'%':'–'}</div></div>
+    </div>${html}`;
+}
+
+// ── Download recap ────────────────────────────────────────────────────────
+function downloadRecap(){
+  const month=document.getElementById('r-month').value;
+  const brand=document.getElementById('r-brand').value;
+  const bRows=budgetRows.filter(r=>(!month||r.month===month||!r.month)&&(!brand||r.dept===brand));
+  const txRows=cumulLog.filter(r=>!isTax(r.coa)&&r.amount>0&&(!month||r.month===month)&&(!brand||r.brand===brand));
+  if(!bRows.length){toast('No budget data to download',true);return}
+  const actMap={};
+  txRows.forEach(r=>{const k=r.brand+'||'+r.coa+'||'+(r.month||'');actMap[k]=(actMap[k]||0)+Number(r.amount)});
+  const brands=[...new Set(bRows.map(r=>r.dept))].sort();
+  const wsData=[['Brand','COA','COA Name','Month','Budget (IDR)','Actual (IDR)','Balance (IDR)','% Used','Status']];
+  brands.forEach(br=>{
+    bRows.filter(r=>r.dept===br).forEach(r=>{
+      const{val:budVal}=getBudget(r.dept,r.coa,r.month);
+      const act=actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0;
+      const p=pct(act,budVal);
+      wsData.push([br,r.coa,r.name,fmtMonth(r.month),budVal,act,budVal-act,p!==null?p+'%':'–',scLabel(p)]);
+    });
+    const brB=bRows.filter(r=>r.dept===br).reduce((s,r)=>s+getBudget(r.dept,r.coa,r.month).val,0);
+    const brA=bRows.filter(r=>r.dept===br).reduce((s,r)=>s+(actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0),0);
+    wsData.push(['TOTAL — '+br,'','','',brB,brA,brB-brA,pct(brA,brB)!==null?pct(brA,brB)+'%':'–','']);
+    wsData.push([]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Budget Recap');
+  const label=(month?fmtMonth(month):'All')+(brand?'_'+brand:'');
+  XLSX.writeFile(wb,'Budget_Recap_'+label.replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Recap downloaded');
+}
+
+// ── Budget details ────────────────────────────────────────────────────────
+async function updateLogRow(rowId,field,val){
+  const idx=cumulLog.findIndex(r=>r.rowId===rowId);
+  if(idx<0)return;
+  cumulLog[idx][field]=field==='amount'?parseFloat(val)||0:val;
+  await saveToSheets({type:'log',cumulLog});
+  if(field==='amount')renderRecap();
+}
+async function deleteLogRow(rowId){
+  cumulLog=cumulLog.filter(r=>r.rowId!==rowId);
+  await saveToSheets({type:'log',cumulLog});
+  refreshAll();
+}
+
+function renderLog(){
+  const month=document.getElementById('l-month').value;
+  const brand=document.getElementById('l-brand').value;
+  const type=document.getElementById('l-type').value;
+  const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
+  if(!rows.length){
+    document.getElementById('log-content').innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>${cumulLog.length?'No rows match selected filters':'No transactions yet. Upload a budget request list to begin.'}</p></div>`;return;
+  }
+  const sorted=[...rows].sort((a,b)=>{
+    const da=typeof(a.date||a.tanggal)==='number'?a.date||a.tanggal:0;
+    const db=typeof(b.date||b.tanggal)==='number'?b.date||b.tanggal:0;
+    return db-da;
+  });
+  const nonTaxTotal=rows.filter(r=>!isTax(r.coa)&&r.amount>0).reduce((s,r)=>s+Number(r.amount),0);
+  const trs=sorted.map(r=>{
+    const b=bs(r.brand),d=r.date||r.tanggal,tax=isTax(r.coa),rid=r.rowId||'';
+    return`<tr>
+      <td class="muted">${fmtDate(d)||'–'}</td>
+      <td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${b.bg};color:${b.txt}">${r.brand||'–'}</span></td>
+      <td class="muted">${r.type}</td>
+      <td class="muted">${r.coa}</td>
+      <td style="font-size:12px">${r.coaName||'–'}</td>
+      <td style="font-size:12px">${(r.type==='PP'?r.namaPemasok:'')||'–'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${(r.catatan||'').replace(/"/g,'&quot;')}">${r.catatan||'–'}</td>
+      <td><input class="amt-input" type="text" value="${Number(r.amount).toLocaleString('id-ID')}"
+        onchange="updateLogRow('${rid}','amount',this.value.replace(/\\./g,'').replace(/[^0-9.\\-]/g,''))"
+        style="${tax?'color:var(--text-3)':''}"></td>
+      <td><input class="note-input" type="text" value="${(r.note||'').replace(/"/g,'&quot;')}"
+        placeholder="Add note…" onchange="updateLogRow('${rid}','note',this.value)"></td>
+      <td style="text-align:center"><button class="del-row-btn" onclick="deleteLogRow('${rid}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('log-content').innerHTML=`
+    <div class="preview-block">
+      <div class="preview-label"><span>${rows.length} rows</span><span style="font-weight:400;color:var(--text-2)">Non-tax total: <strong style="color:var(--text)">${fmt(nonTaxTotal)}</strong> IDR</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th style="width:80px">Date</th><th style="width:130px">Brand</th>
+          <th style="width:40px">Type</th><th style="width:90px">COA</th>
+          <th style="width:150px">COA name</th><th style="width:110px">Vendor</th>
+          <th>Description</th>
+          <th class="nr" style="width:125px">Amount (IDR)</th>
+          <th style="width:150px">Note</th><th style="width:40px"></th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+        <tr class="tfoot"><td colspan="7">${rows.length} rows</td><td class="nr">${fmt(nonTaxTotal)}</td><td colspan="2"></td></tr>
+      </table></div>
+    </div>`;
+}
+
+// ── Download details ──────────────────────────────────────────────────────
+function downloadDetails(){
+  const month=document.getElementById('l-month').value;
+  const brand=document.getElementById('l-brand').value;
+  const type=document.getElementById('l-type').value;
+  const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
+  if(!rows.length){toast('No data to download',true);return}
+  const wsData=[['Date','Brand','Type','COA','COA Name','Vendor','Description','Amount (IDR)','Note','Month']];
+  rows.forEach(r=>{
+    wsData.push([fmtDate(r.date||r.tanggal),r.brand,r.type==='PP'?'Pesanan Pembelian':'Pencatatan Beban',r.coa,r.coaName,(r.type==='PP'?r.namaPemasok:'')||'',r.catatan||'',Number(r.amount),r.note||'',fmtMonth(r.month)]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Budget Details');
+  const label=(month?fmtMonth(month):'All')+(brand?'_'+brand:'');
+  XLSX.writeFile(wb,'Budget_Details_'+label.replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Details downloaded');
+}
+
+// ── Templates ─────────────────────────────────────────────────────────────
+function renderTemplatePP(){
+  const el=document.getElementById('pp-content');
+  if(!latestPP.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No Pesanan Pembelian data in latest upload</p></div>';return}
+  const nos=[...new Set(latestPP.map(r=>r.no))].sort((a,b)=>a-b);
+  const preview=[];
+  nos.slice(0,4).forEach(no=>{
+    const g=latestPP.filter(r=>r.no===no),f=g[0];
+    preview.push(`<tr class="row-header"><td colspan="7">HEADER — ${fmtDate(f.date)} · Pemasok: ${f.pemasok} (${f.namaPemasok}) · ${f.keterangan}</td></tr>`);
+    g.forEach(r=>preview.push(`<tr><td class="muted" style="padding-left:28px">EXPENSE</td><td class="muted">${r.coa}</td><td>${r.coaName}</td><td class="nr">${fmt(r.amount)}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.catatan}</td><td>${r.brand}</td><td>${r.brand}</td></tr>`));
+  });
+  el.innerHTML=`
+    <div class="gen-notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Generated from the <strong>latest uploaded</strong> budget request list only. ${nos.length} PO header${nos.length>1?'s':''}, ${latestPP.length+nos.length} total rows.</span></div>
+    <div class="preview-block">
+      <div class="preview-label"><span>Preview${nos.length>4?' (first 4 POs)':''}</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Row type</th><th>No Biaya</th><th>Nama Biaya</th><th class="nr">Nilai Biaya</th><th>Catatan Biaya</th><th>Nama Dept Biaya</th><th>Kategori Keu. 1</th></tr></thead>
+        <tbody>${preview.join('')}</tbody>
+      </table></div>
+    </div>
+    <button class="dl-btn primary" onclick="downloadPP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Pesanan Pembelian template (.xlsx)</button>`;
+}
+function renderTemplatePB(){
+  const el=document.getElementById('pb-content');
+  if(!latestPB.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No Pencatatan Beban data in latest upload</p></div>';return}
+  const nos=[...new Set(latestPB.map(r=>r.no))].sort((a,b)=>a-b);
+  const preview=[];
+  nos.slice(0,4).forEach(no=>{
+    const g=latestPB.filter(r=>r.no===no),f=g[0];
+    preview.push(`<tr class="row-header"><td colspan="6">HEADER — Hutang: 211401101 · ${fmtDate(f.tanggal)} · Jatuh Tempo: ${fmtDate(f.jatuhTempo)} · ${f.keterangan}</td></tr>`);
+    g.forEach(r=>preview.push(`<tr><td class="muted" style="padding-left:28px">ACCOUNT</td><td class="muted">${r.coa}</td><td>${r.coaName}</td><td class="nr">${fmt(r.amount)}</td><td>${r.brand}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.catatan}</td></tr>`));
+  });
+  el.innerHTML=`
+    <div class="gen-notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Generated from the <strong>latest uploaded</strong> budget request list only. ${nos.length} header${nos.length>1?'s':''}, ${latestPB.length+nos.length} total rows. Hutang Beban always <strong>211401101</strong>.</span></div>
+    <div class="preview-block">
+      <div class="preview-label"><span>Preview${nos.length>4?' (first 4 entries)':''}</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Row type</th><th>No Akun</th><th>Nama Akun</th><th class="nr">Nilai Akun</th><th>Nama Departemen</th><th>Catatan Akun</th></tr></thead>
+        <tbody>${preview.join('')}</tbody>
+      </table></div>
+    </div>
+    <button class="dl-btn primary" onclick="downloadPB()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Pencatatan Beban template (.xlsx)</button>`;
+}
+function downloadPP(){
+  const W=49;
+  const wsData=[
+    ['HEADER','No Form','Tgl Pesanan','No Pemasok','Alamat Kirim','Kena PPN','Total Termasuk PPN','Diskon Pesanan (%)','Diskon Pesanan (Rp)','Keterangan','Nama Cabang','Pengiriman','Tgl Pengiriman','FOB','Syarat Pembayaran','Mata Uang','Kurs Saldo (Jika Asing)',...Array(22).fill(null)],
+    ['ITEM','Kode Barang','Nama Barang','Kuantitas','Satuan','Harga Satuan','Diskon Barang (%)','Diskon Barang (Rp)','Catatan Barang','Nama Dept Barang','No Proyek Barang','Nama Gudang',...Array(27).fill(null),'Kategori Keuangan 1',...Array(9).fill(null)],
+    ['EXPENSE','No Biaya','Nama Biaya','Nilai Biaya','Catatan Biaya','Nama Dept Biaya','No Proyek Biaya','Kategori Keuangan 1',...Array(41).fill(null)],
+  ];
+  const nos=[...new Set(latestPP.map(r=>r.no))].sort((a,b)=>a-b);
+  nos.forEach(no=>{
+    const g=latestPP.filter(r=>r.no===no),f=g[0];
+    const hRow=Array(W).fill(null);
+    hRow[0]='HEADER';hRow[2]=fmtDate(f.date);hRow[3]=f.pemasok;hRow[4]=f.alamat;hRow[5]='Tidak';hRow[6]='Tidak';hRow[9]=f.keterangan;
+    wsData.push(hRow);
+    g.forEach(r=>{const eRow=Array(W).fill(null);eRow[0]='EXPENSE';eRow[1]=r.coa;eRow[2]=r.coaName;eRow[3]=r.amount;eRow[4]=r.catatan;eRow[5]=r.brand;eRow[7]=r.brand;wsData.push(eRow)});
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Template Pesanan Pembelian');
+  XLSX.writeFile(wb,'Template_PP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Pesanan Pembelian downloaded');
+}
+function downloadPB(){
+  const W=29;
+  const wsData=[
+    ['HEADER','No Beban','Hutang Beban','Tanggal','Tanggal Jatuh Tempo','Cabang','Catatan',...Array(22).fill(null)],
+    ['ACCOUNT','No Akun','Nama Akun','Nilai Akun','Nama Departemen','No Proyek','Catatan Akun','Kategori Keuangan 1',...Array(21).fill(null)],
+  ];
+  const nos=[...new Set(latestPB.map(r=>r.no))].sort((a,b)=>a-b);
+  nos.forEach(no=>{
+    const g=latestPB.filter(r=>r.no===no),f=g[0];
+    const hRow=Array(W).fill(null);
+    hRow[0]='HEADER';hRow[2]='211401101';hRow[3]=fmtDate(f.tanggal);hRow[4]=fmtDate(f.jatuhTempo);hRow[6]=f.keterangan;
+    wsData.push(hRow);
+    g.forEach(r=>{const aRow=Array(W).fill(null);aRow[0]='ACCOUNT';aRow[1]=r.coa;aRow[2]=r.coaName;aRow[3]=r.amount;aRow[4]=r.brand;aRow[6]=r.catatan;aRow[7]=r.brand;wsData.push(aRow)});
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Template Pencatatan Beban');
+  XLSX.writeFile(wb,'Template_PB_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Pencatatan Beban downloaded');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+// Check if sheet URL is stored, show setup prompt if not
+window.addEventListener('DOMContentLoaded',()=>{
+  if(SHEET_URL){
+    loadFromSheets();
+  } else {
+    // Show setup banner inside main
+    const banner=document.createElement('div');
+    banner.id='setup-banner';
+    banner.className='setup-banner';
+    banner.innerHTML=`
+      <h3>🔗 Connect to Google Sheets to get started</h3>
+      <p>This tool uses a shared Google Sheet so your whole team sees the same data. You only need to do this once — paste your Apps Script URL below.</p>
+      <p style="margin-bottom:10px">Don't have one yet? Follow the <strong>Setup Guide</strong> included with this file.</p>
+      <input type="text" id="inline-url-input" placeholder="https://script.google.com/macros/s/…/exec">
+      <button onclick="saveFromBanner()">Connect</button>`;
+    document.getElementById('recap-content').prepend(banner);
+  }
+});
+function saveFromBanner(){
+  const url=document.getElementById('inline-url-input')?.value?.trim();
+  if(!url){toast('Please enter the Apps Script URL',true);return}
+  SHEET_URL=url;localStorage.setItem('mbt_sheet_url',url);
+  document.getElementById('setup-banner')?.remove();
+  toast('Connecting…');loadFromSheets();
+}
+</script>
+</body>
+</html>
