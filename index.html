@@ -247,24 +247,34 @@ function isTax(coa){return TAX_COAS.has(String(coa).trim())}
 
 // ── State ─────────────────────────────────────────────────────────────────
 let budgetRows=[], cumulLog=[], latestPP=[], latestPB=[], budgetOverrides={};
-let SHEET_URL = 'https://script.google.com/macros/s/AKfycbx93TD_4QP1h3DGtSC5bnNtX_RnOMk4uAHwmqrwEUcZgx2pYhYmvZn_A0ePB8w0ZkMo/exec';
+let SHEET_URL = localStorage.getItem('https://script.google.com/macros/s/AKfycbx93TD_4QP1h3DGtSC5bnNtX_RnOMk4uAHwmqrwEUcZgx2pYhYmvZn_A0ePB8w0ZkMo/exec')||'';
 
 // ── Date helpers ──────────────────────────────────────────────────────────
 // Excel epoch fix: Dec 30 1899 (accounts for Excel's 1900 leap year bug)
 function excelSerialToDate(serial){
   if(typeof serial!=='number') return null;
-  const epoch=new Date(Date.UTC(1899,11,30));
-  return new Date(epoch.getTime()+serial*86400000);
+  // Excel epoch: Dec 30 1899. We decompose into y/m/d directly
+  // to avoid any UTC/local timezone shift.
+  // Using the standard algorithm: serial 1 = Jan 1 1900
+  let s = serial;
+  // Excel wrongly treats 1900 as leap year (serial 60 = Feb 29 1900, skip it)
+  if(s >= 60) s -= 1;
+  // Days since Jan 1 1900 (serial 1)
+  const days = s - 1;
+  const ms = days * 86400000;
+  // Build date from a fixed local-midnight reference: Jan 1 1900 local
+  const ref = new Date(1900, 0, 1); // local midnight Jan 1 1900
+  return new Date(ref.getTime() + ms);
 }
 function toMonthKey(v){
   if(!v&&v!==0) return '';
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
-    return v.getUTCFullYear()+'-'+String(v.getUTCMonth()+1).padStart(2,'0');
+    return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
   }
   if(typeof v==='number'){
     const d=excelSerialToDate(v); if(!d) return '';
-    return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
   }
   const s=String(v), m=s.match(/(\d{4})[-\/](\d{1,2})/);
   return m?m[1]+'-'+m[2].padStart(2,'0'):'';
@@ -273,11 +283,11 @@ function fmtDate(v){
   if(!v) return '';
   if(typeof v==='number'){
     const d=excelSerialToDate(v); if(!d) return '';
-    return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear();
+    return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
   }
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
-    return String(v.getUTCDate()).padStart(2,'0')+'/'+String(v.getUTCMonth()+1).padStart(2,'0')+'/'+v.getUTCFullYear();
+    return String(v.getDate()).padStart(2,'0')+'/'+String(v.getMonth()+1).padStart(2,'0')+'/'+v.getFullYear();
   }
   const s=String(v), m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m?m[3]+'/'+m[2]+'/'+m[1]:s.slice(0,10);
@@ -310,6 +320,15 @@ function findCol(headers,...terms){
     const found=headers.find(h=>h.toLowerCase().replace(/[\s\/\.\(\)]/g,'').includes(key));
     if(found) return found;
   }return null;
+}
+// Get the spreadsheet column letter for a given header name
+function getColLetter(ws,headerName,range){
+  for(let c=range.s.c;c<=range.e.c;c++){
+    const addr=XLSX.utils.encode_cell({r:range.s.r,c});
+    const cell=ws[addr];
+    if(cell&&String(cell.v).trim()===headerName) return XLSX.utils.encode_col(c);
+  }
+  return null;
 }
 function toast(msg,err=false){
   const el=document.getElementById('toast');
@@ -395,9 +414,10 @@ function loadBudget(input){
   const rd=new FileReader();
   rd.onload=async e=>{
     try{
+      // Use raw:true so date serials stay as numbers, not pre-formatted strings
       const wb=XLSX.read(e.target.result,{type:'binary',cellDates:false});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(ws,{defval:''});
+      const json=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
       if(!json.length){toast('Budget file is empty',true);return}
       const h=Object.keys(json[0]);
       const deptC=findCol(h,'dept','department','divisi','brand');
@@ -406,17 +426,42 @@ function loadBudget(input){
       const monthC=findCol(h,'month','bulan','periode');
       const budgetC=findCol(h,'budget','anggaran','target');
       if(!coaC||!budgetC){toast('Cannot find COA or Budget column',true);return}
+
+      // For mm/yyyy formatted cells, XLSX returns a serial number.
+      // We need to extract the month key from the raw cell w property (formatted text)
+      // if available, to avoid serial → date conversion issues entirely.
+      const range=XLSX.utils.decode_range(ws['!ref']);
+      // Build a map of row index → raw formatted month string from the sheet cells directly
+      const monthColLetter=monthC?getColLetter(ws,monthC,range):null;
+      function getRawMonthForRow(rowIdx){
+        if(!monthColLetter)return'';
+        const addr=monthColLetter+rowIdx;
+        const cell=ws[addr];
+        if(!cell)return'';
+        // w = formatted text (e.g. "05/2026"), v = raw serial number
+        if(cell.w){
+          // cell.w is formatted as mm/yyyy → parse as month/year
+          const m=cell.w.match(/^(\d{1,2})\/(\d{4})$/);
+          if(m)return m[2]+'-'+m[1].padStart(2,'0');
+        }
+        // fallback: use serial
+        return toMonthKey(cell.v);
+      }
+
       const newMonths=new Set();
-      json.forEach(r=>{const mk=toMonthKey(r[monthC]);if(mk)newMonths.add(mk)});
+      // Row 2 onwards (row 1 is header), XLSX rows are 1-indexed
+      for(let ri=range.s.r+2;ri<=range.e.r+1;ri++){
+        const mk=getRawMonthForRow(ri);if(mk)newMonths.add(mk);
+      }
       // Clear overrides for replaced months
       newMonths.forEach(mk=>{Object.keys(budgetOverrides).forEach(k=>{if(k.endsWith('||'+mk))delete budgetOverrides[k]})});
       // Pivot
       const map={},nameMap={};
-      json.forEach(r=>{
+      json.forEach((r,i)=>{
         const dept=String(r[deptC]||'').trim().toUpperCase();
         const coa=String(r[coaC]||'').trim();
         const name=String(r[nameC]||'').trim();
-        const month=toMonthKey(r[monthC]);
+        const month=getRawMonthForRow(i+2); // +2: 1-indexed + skip header
         const budget=parseNum(r[budgetC]);
         if(!coa&&!budget)return;
         const k=dept+'||'+coa+'||'+month;
@@ -687,14 +732,16 @@ function renderLog(){
       <td style="font-size:12px">${(r.type==='PP'?r.namaPemasok:'')||'–'}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${(r.catatan||'').replace(/"/g,'&quot;')}">${r.catatan||'–'}</td>
       <td><input class="amt-input" type="text" value="${Number(r.amount).toLocaleString('id-ID')}"
-        onchange="updateLogRow('${rid}','amount',this.value.replace(/\\./g,'').replace(/[^0-9.\\-]/g,''))"
+        data-rowid="${rid}" data-field="amount"
         style="${tax?'color:var(--text-3)':''}"></td>
       <td><input class="note-input" type="text" value="${(r.note||'').replace(/"/g,'&quot;')}"
-        placeholder="Add note…" onchange="updateLogRow('${rid}','note',this.value)"></td>
-      <td style="text-align:center"><button class="del-row-btn" onclick="deleteLogRow('${rid}')">✕</button></td>
+        data-rowid="${rid}" data-field="note"
+        placeholder="Add note…"></td>
+      <td style="text-align:center"><button class="del-row-btn" data-rowid="${rid}">✕</button></td>
     </tr>`;
   }).join('');
-  document.getElementById('log-content').innerHTML=`
+  const logEl = document.getElementById('log-content');
+  logEl.innerHTML=`
     <div class="preview-block">
       <div class="preview-label"><span>${rows.length} rows</span><span style="font-weight:400;color:var(--text-2)">Non-tax total: <strong style="color:var(--text)">${fmt(nonTaxTotal)}</strong> IDR</span></div>
       <div class="table-wrap"><table>
@@ -710,6 +757,19 @@ function renderLog(){
         <tr class="tfoot"><td colspan="7">${rows.length} rows</td><td class="nr">${fmt(nonTaxTotal)}</td><td colspan="2"></td></tr>
       </table></div>
     </div>`;
+  // Delegated events — safe after innerHTML is written
+  logEl.onclick = e => {
+    const btn = e.target.closest('.del-row-btn');
+    if(btn){ deleteLogRow(btn.dataset.rowid); }
+  };
+  logEl.onchange = e => {
+    const el = e.target;
+    if(el.classList.contains('amt-input')){
+      updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
+    } else if(el.classList.contains('note-input')){
+      updateLogRow(el.dataset.rowid,'note',el.value);
+    }
+  };
 }
 
 // ── Download details ──────────────────────────────────────────────────────
