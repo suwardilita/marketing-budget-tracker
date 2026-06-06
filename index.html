@@ -7,11 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{
-  --bg:#F7F6F2;--surface:#FFFFFF;--border:#E4E2DA;--border-strong:#C8C5BB;
-  --text:#1A1916;--text-2:#6B6860;--text-3:#9E9C97;
-  --radius:10px;--radius-sm:6px;
-}
+:root{--bg:#F7F6F2;--surface:#FFFFFF;--border:#E4E2DA;--border-strong:#C8C5BB;--text:#1A1916;--text-2:#6B6860;--text-3:#9E9C97;--radius:10px;--radius-sm:6px}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--bg)}
 body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
@@ -36,7 +32,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text)
 .upload-btn:last-of-type{margin-bottom:0}
 .upload-btn:hover{border-color:var(--text);color:var(--text)}
 .upload-btn.uploaded{border-color:#4F6A57;color:#2D3D30;background:#EEF2EF}
-.upload-btn.loading{border-color:#946B00;color:#946B00;background:#FDF6E0}
 .upload-btn svg{width:14px;height:14px;flex-shrink:0}
 .upload-btn input{display:none}
 .uz-filename{font-size:10px;color:var(--text-3);margin-top:3px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -57,10 +52,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text)
 .brand-stats{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:10px}
 .brand-stats strong{color:var(--text);font-weight:600}
 .status-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
-.s-ok{background:#EEF4EB;color:#2D6A4F}
-.s-warn{background:#FDF6E0;color:#946B00}
-.s-spent{background:#FDEBD0;color:#D35400}
-.s-over{background:#FDECEC;color:#C0392B}
+.s-ok{background:#EEF4EB;color:#2D6A4F}.s-warn{background:#FDF6E0;color:#946B00}.s-spent{background:#FDEBD0;color:#D35400}.s-over{background:#FDECEC;color:#C0392B}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg);text-align:left;white-space:nowrap}
@@ -103,14 +95,12 @@ tbody tr:hover td{background:#FAFAF8}
 .syncing{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);padding:4px 0}
 .spin{animation:spin .8s linear infinite;width:12px;height:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.connected-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#2D6A4F;background:#EEF4EB;border:1px solid #b7ddb7;border-radius:20px;padding:3px 10px}
 .setup-banner{background:#EAEDFF;border:1px solid #c5cbfa;border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem}
 .setup-banner h3{font-size:14px;font-weight:700;color:#1A2AB0;margin-bottom:6px}
 .setup-banner p{font-size:13px;color:#1A2AB0;margin-bottom:10px;line-height:1.5}
 .setup-banner input{width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid #c5cbfa;background:#fff;color:var(--text);outline:none;margin-bottom:8px}
-.setup-banner input:focus{border-color:#3D5AFE}
 .setup-banner button{font-family:inherit;font-size:13px;font-weight:600;padding:7px 16px;border-radius:var(--radius-sm);border:none;background:#3D5AFE;color:#fff;cursor:pointer}
-.setup-banner button:hover{background:#1A2AB0}
-.connected-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#2D6A4F;background:#EEF4EB;border:1px solid #b7ddb7;border-radius:20px;padding:3px 10px}
 </style>
 </head>
 <body>
@@ -162,7 +152,6 @@ tbody tr:hover td{background:#FAFAF8}
 </aside>
 
 <main class="main">
-  <!-- RECAP -->
   <div id="panel-recap" class="panel active">
     <div class="page-header">
       <div class="page-header-left">
@@ -182,7 +171,6 @@ tbody tr:hover td{background:#FAFAF8}
     </div>
   </div>
 
-  <!-- BUDGET DETAILS -->
   <div id="panel-log" class="panel">
     <div class="page-header">
       <div class="page-header-left">
@@ -203,13 +191,11 @@ tbody tr:hover td{background:#FAFAF8}
     </div>
   </div>
 
-  <!-- PP -->
   <div id="panel-pp" class="panel">
     <div class="page-header"><div class="page-header-left"><div class="page-title">Pesanan Pembelian template</div><div class="page-sub">From the most recently uploaded budget request list. Download and import into Accurate Online.</div></div></div>
     <div id="pp-content"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Upload a budget request list to generate this template</p></div></div>
   </div>
 
-  <!-- PB -->
   <div id="panel-pb" class="panel">
     <div class="page-header"><div class="page-header-left"><div class="page-title">Pencatatan Beban template</div><div class="page-sub">From the most recently uploaded budget request list. Download and import into Accurate Online.</div></div></div>
     <div id="pb-content"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Upload a budget request list to generate this template</p></div></div>
@@ -218,21 +204,7 @@ tbody tr:hover td{background:#FAFAF8}
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- GOOGLE SHEETS URL SETUP MODAL -->
-<div id="setup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center">
-  <div style="background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)">
-    <h2 style="font-size:16px;font-weight:700;margin-bottom:8px">Connect to Google Sheets</h2>
-    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">Paste your Google Apps Script web app URL below. This connects all team members to the same shared database. See the setup guide for instructions.</p>
-    <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;margin-bottom:12px">
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button onclick="closeSetup()" style="font-family:inherit;font-size:13px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer">Cancel</button>
-      <button onclick="saveSheetUrl()" style="font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);border:none;background:#3D5AFE;color:#fff;cursor:pointer">Connect</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ── Config ────────────────────────────────────────────────────────────────
 const BRANDS={
   'BELLAMYS ORGANIC':          {c:'#4F6A57',bg:'#EEF2EF',txt:'#2D3D30'},
   'COMVITA':                   {c:'#3D5AFE',bg:'#EAEDFF',txt:'#1A2AB0'},
@@ -241,234 +213,196 @@ const BRANDS={
   'NOW SUPPLEMENT (NON BPOM)':{c:'#9B7EC8',bg:'#F3EEFB',txt:'#4D2D8A'},
   'NUTRIBULLET':               {c:'#7A2E3A',bg:'#F7EAEC',txt:'#4D1520'},
 };
-function bs(name){return BRANDS[name]||{c:'#888',bg:'#F5F5F5',txt:'#333'}}
+function bs(n){return BRANDS[n]||{c:'#888',bg:'#F5F5F5',txt:'#333'}}
 const TAX_COAS=new Set(['111901201','111901202','211601101','211601102','211601103']);
-function isTax(coa){return TAX_COAS.has(String(coa).trim())}
+function isTax(c){return TAX_COAS.has(String(c).trim())}
 
-// ── State ─────────────────────────────────────────────────────────────────
-let budgetRows=[], cumulLog=[], latestPP=[], latestPB=[], budgetOverrides={};
-let SHEET_URL = 'https://script.google.com/macros/s/AKfycbx93TD_4QP1h3DGtSC5bnNtX_RnOMk4uAHwmqrwEUcZgx2pYhYmvZn_A0ePB8w0ZkMo/exec';
+let budgetRows=[],cumulLog=[],latestPP=[],latestPB=[],budgetOverrides={};
+
+// ── IMPORTANT: hardcode your Apps Script URL here ─────────────────────────
+// Replace the URL below with your own if you redeploy
+const SHEET_URL='https://script.google.com/macros/s/AKfycbx93TD_4QP1h3DGtSC5bnNtX_RnOMk4uAHwmqrwEUcZgx2pYhYmvZn_A0ePB8w0ZkMo/exec';
 
 // ── Date helpers ──────────────────────────────────────────────────────────
-// Excel epoch fix: Dec 30 1899 (accounts for Excel's 1900 leap year bug)
-function excelSerialToDate(serial){
-  if(typeof serial!=='number') return null;
-  // Excel epoch: Dec 30 1899. We decompose into y/m/d directly
-  // to avoid any UTC/local timezone shift.
-  // Using the standard algorithm: serial 1 = Jan 1 1900
-  let s = serial;
-  // Excel wrongly treats 1900 as leap year (serial 60 = Feb 29 1900, skip it)
-  if(s >= 60) s -= 1;
-  // Days since Jan 1 1900 (serial 1)
-  const days = s - 1;
-  const ms = days * 86400000;
-  // Build date from a fixed local-midnight reference: Jan 1 1900 local
-  const ref = new Date(1900, 0, 1); // local midnight Jan 1 1900
-  return new Date(ref.getTime() + ms);
+// THE KEY INSIGHT: read cell.w (Excel's own formatted text) first.
+// cell.w for a mm/yyyy date looks like "05/2026" — parse that directly.
+// Only fall back to serial arithmetic if cell.w is unavailable.
+// This completely bypasses all timezone issues.
+
+function monthKeyFromCell(cell){
+  if(!cell) return '';
+  // Prefer the formatted text Excel already computed — e.g. "05/2026"
+  if(cell.w){
+    const w=cell.w.trim();
+    // mm/yyyy
+    let m=w.match(/^(\d{1,2})\/(\d{4})$/);
+    if(m) return m[2]+'-'+m[1].padStart(2,'0');
+    // yyyy-mm or yyyy/mm
+    m=w.match(/^(\d{4})[-\/](\d{1,2})$/);
+    if(m) return m[1]+'-'+m[2].padStart(2,'0');
+    // mmm-yyyy or mmm yyyy e.g. "May-2026"
+    const months={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    m=w.match(/^([a-zA-Z]{3})[-\s](\d{4})$/);
+    if(m&&months[m[1].toLowerCase()]) return m[2]+'-'+months[m[1].toLowerCase()];
+  }
+  // Fall back: serial → local date (no UTC)
+  if(typeof cell.v==='number'){
+    let s=cell.v;
+    if(s>=60) s-=1; // Excel leap year bug
+    const d=new Date(new Date(1900,0,1).getTime()+(s-1)*86400000);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
+  // String fallback
+  if(typeof cell.v==='string'){
+    const m=cell.v.match(/(\d{4})[-\/](\d{1,2})/);
+    if(m) return m[1]+'-'+m[2].padStart(2,'0');
+  }
+  return '';
 }
+
+// For transaction dates (dd/mm/yyyy serials)
+function serialToLocalDate(serial){
+  if(typeof serial!=='number') return null;
+  let s=serial;
+  if(s>=60) s-=1;
+  return new Date(new Date(1900,0,1).getTime()+(s-1)*86400000);
+}
+
 function toMonthKey(v){
   if(!v&&v!==0) return '';
+  if(typeof v==='number'){
+    const d=serialToLocalDate(v); if(!d) return '';
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
   }
-  if(typeof v==='number'){
-    const d=excelSerialToDate(v); if(!d) return '';
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-  }
-  const s=String(v), m=s.match(/(\d{4})[-\/](\d{1,2})/);
+  const s=String(v),m=s.match(/(\d{4})[-\/](\d{1,2})/);
   return m?m[1]+'-'+m[2].padStart(2,'0'):'';
 }
+
 function fmtDate(v){
   if(!v) return '';
   if(typeof v==='number'){
-    const d=excelSerialToDate(v); if(!d) return '';
+    const d=serialToLocalDate(v); if(!d) return '';
     return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
   }
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return String(v.getDate()).padStart(2,'0')+'/'+String(v.getMonth()+1).padStart(2,'0')+'/'+v.getFullYear();
   }
-  const s=String(v), m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  const s=String(v),m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m?m[3]+'/'+m[2]+'/'+m[1]:s.slice(0,10);
 }
-function fmtMonth(key){
-  if(!key) return '';
-  const[y,mo]=key.split('-');
+
+function fmtMonth(k){
+  if(!k)return'';
+  const[y,mo]=k.split('-');
   return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1]+' '+y;
 }
 function fmt(n){if(n===null||n===undefined||n==='')return'–';return Math.round(Number(n)).toLocaleString('id-ID')}
 function pct(a,b){return b?Math.round(a/b*100):null}
-function scClass(p){
-  if(p===null) return 'ok';
-  if(p>100) return 'over';
-  if(p===100) return 'spent';
-  if(p>=80) return 'warn';
-  return 'ok';
-}
-function scLabel(p){
-  if(p===null) return '–';
-  if(p>100) return 'Over';
-  if(p===100) return 'Spent';
-  if(p>=80) return 'Near';
-  return 'OK';
-}
+function scClass(p){if(p===null)return'ok';if(p>100)return'over';if(p===100)return'spent';if(p>=80)return'warn';return'ok'}
+function scLabel(p){if(p===null)return'–';if(p>100)return'Over';if(p===100)return'Spent';if(p>=80)return'Near';return'OK'}
 function parseNum(v){if(typeof v==='number')return v;return parseFloat(String(v||'').replace(/[^0-9.\-]/g,''))||0}
 function findCol(headers,...terms){
   for(const t of terms){
-    const key=t.toLowerCase().replace(/[\s\/\.\(\)]/g,'');
-    const found=headers.find(h=>h.toLowerCase().replace(/[\s\/\.\(\)]/g,'').includes(key));
-    if(found) return found;
+    const k=t.toLowerCase().replace(/[\s\/\.\(\)]/g,'');
+    const f=headers.find(h=>h.toLowerCase().replace(/[\s\/\.\(\)]/g,'').includes(k));
+    if(f)return f;
   }return null;
-}
-// Get the spreadsheet column letter for a given header name
-function getColLetter(ws,headerName,range){
-  for(let c=range.s.c;c<=range.e.c;c++){
-    const addr=XLSX.utils.encode_cell({r:range.s.r,c});
-    const cell=ws[addr];
-    if(cell&&String(cell.v).trim()===headerName) return XLSX.utils.encode_col(c);
-  }
-  return null;
 }
 function toast(msg,err=false){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className='toast show'+(err?' err':'');
   clearTimeout(el._t);el._t=setTimeout(()=>{el.className='toast'},4000);
 }
-function setSyncing(on){
-  document.getElementById('sync-status').style.display=on?'flex':'none';
-}
+function setSyncing(on){document.getElementById('sync-status').style.display=on?'flex':'none'}
 
-// ── Google Sheets API ─────────────────────────────────────────────────────
-function showSetup(){
-  document.getElementById('setup-modal').style.display='flex';
-  document.getElementById('sheets-url-input').value=SHEET_URL;
-}
-function closeSetup(){document.getElementById('setup-modal').style.display='none'}
-function saveSheetUrl(){
-  const url=document.getElementById('sheets-url-input').value.trim();
-  if(!url){toast('Please enter a URL',true);return}
-  SHEET_URL=url;
-  localStorage.setItem('mbt_sheet_url',url);
-  closeSetup();
-  toast('Connecting to Google Sheets…');
-  loadFromSheets();
-}
+// ── Sheets API ────────────────────────────────────────────────────────────
 function updateConnectionBadge(){
   document.getElementById('connected-badge').style.display=SHEET_URL?'block':'none';
   document.getElementById('sync-status').style.display='none';
 }
-
-async function sheetsRequest(action, payload={}){
-  if(!SHEET_URL) return null;
+async function sheetsRequest(action,payload={}){
   setSyncing(true);
   try{
     const url=SHEET_URL+'?action='+action;
-    let resp;
-    if(action==='read'){
-      resp=await fetch(url);
-    } else {
-      resp=await fetch(url,{method:'POST',body:JSON.stringify({action,...payload})});
-    }
-    const text=await resp.text();
-    const data=JSON.parse(text);
-    setSyncing(false);
-    return data;
+    const resp=action==='read'
+      ?await fetch(url)
+      :await fetch(url,{method:'POST',body:JSON.stringify({action,...payload})});
+    const data=JSON.parse(await resp.text());
+    setSyncing(false);return data;
   }catch(e){
     setSyncing(false);
-    console.error('Sheets error:',e);
     toast('Sheets sync error: '+e.message,true);
     return null;
   }
 }
-
 async function loadFromSheets(){
-  if(!SHEET_URL){updateConnectionBadge();return}
   setSyncing(true);
   const data=await sheetsRequest('read');
   if(!data){updateConnectionBadge();return}
-  if(data.budgetRows) budgetRows=data.budgetRows;
-  if(data.cumulLog) cumulLog=data.cumulLog;
+  if(data.budgetRows)  budgetRows=data.budgetRows;
+  if(data.cumulLog)    cumulLog=data.cumulLog;
   if(data.budgetOverrides) budgetOverrides=data.budgetOverrides;
   updateConnectionBadge();
   refreshAll();
-  toast('Data loaded from Google Sheets');
+  toast('Data loaded');
 }
+async function saveToSheets(payload){await sheetsRequest('write',payload)}
 
-async function saveToSheets(payload){
-  if(!SHEET_URL) return;
-  await sheetsRequest('write',payload);
-}
-
-// ── Navigation ────────────────────────────────────────────────────────────
+// ── Nav ───────────────────────────────────────────────────────────────────
 function showPanel(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');
 }
 
-// ── Budget loader ─────────────────────────────────────────────────────────
+// ── Budget loader — reads cell.w directly, no serial math ─────────────────
 function loadBudget(input){
   const f=input.files[0];if(!f)return;
-  if(!SHEET_URL){toast('Connect to Google Sheets first — click the ⚙ icon',true);return}
   const rd=new FileReader();
   rd.onload=async e=>{
     try{
-      // Use raw:true so date serials stay as numbers, not pre-formatted strings
+      // cellDates:false keeps everything raw so we can read cell.w ourselves
       const wb=XLSX.read(e.target.result,{type:'binary',cellDates:false});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
-      if(!json.length){toast('Budget file is empty',true);return}
-      const h=Object.keys(json[0]);
-      const deptC=findCol(h,'dept','department','divisi','brand');
-      const coaC=findCol(h,'coa','akun','kode');
-      const nameC=findCol(h,'coaname','nama coa','nama biaya','name');
-      const monthC=findCol(h,'month','bulan','periode');
-      const budgetC=findCol(h,'budget','anggaran','target');
-      if(!coaC||!budgetC){toast('Cannot find COA or Budget column',true);return}
-
-      // For mm/yyyy formatted cells, XLSX returns a serial number.
-      // We need to extract the month key from the raw cell w property (formatted text)
-      // if available, to avoid serial → date conversion issues entirely.
+      // Decode range to iterate cells directly
       const range=XLSX.utils.decode_range(ws['!ref']);
-      // Build a map of row index → raw formatted month string from the sheet cells directly
-      const monthColLetter=monthC?getColLetter(ws,monthC,range):null;
-      function getRawMonthForRow(rowIdx){
-        if(!monthColLetter)return'';
-        const addr=monthColLetter+rowIdx;
-        const cell=ws[addr];
-        if(!cell)return'';
-        // w = formatted text (e.g. "05/2026"), v = raw serial number
-        if(cell.w){
-          // cell.w is formatted as mm/yyyy → parse as month/year
-          const m=cell.w.match(/^(\d{1,2})\/(\d{4})$/);
-          if(m)return m[2]+'-'+m[1].padStart(2,'0');
-        }
-        // fallback: use serial
-        return toMonthKey(cell.v);
+      // Read header row (row 0) to find column indices
+      const headers={};
+      for(let c=range.s.c;c<=range.e.c;c++){
+        const cell=ws[XLSX.utils.encode_cell({r:range.s.r,c})];
+        if(cell) headers[String(cell.v).trim().toLowerCase().replace(/[\s\/\.\(\)]/g,'')]=c;
       }
+      const getHdr=(...terms)=>{for(const t of terms){const k=t.toLowerCase().replace(/[\s\/\.\(\)]/g,'');for(const[key,col] of Object.entries(headers)){if(key.includes(k))return col;}}return -1;};
+      const deptCol  =getHdr('dept','department','divisi','brand');
+      const coaCol   =getHdr('coa','akun','kode');
+      const nameCol  =getHdr('coaname','namacoa','namabiaya','name');
+      const monthCol =getHdr('month','bulan','periode');
+      const budgetCol=getHdr('budget','anggaran','target');
+      if(coaCol<0||budgetCol<0){toast('Cannot find COA or Budget column',true);return}
 
-      const newMonths=new Set();
-      // Row 2 onwards (row 1 is header), XLSX rows are 1-indexed
-      for(let ri=range.s.r+2;ri<=range.e.r+1;ri++){
-        const mk=getRawMonthForRow(ri);if(mk)newMonths.add(mk);
-      }
-      // Clear overrides for replaced months
-      newMonths.forEach(mk=>{Object.keys(budgetOverrides).forEach(k=>{if(k.endsWith('||'+mk))delete budgetOverrides[k]})});
-      // Pivot
-      const map={},nameMap={};
-      json.forEach((r,i)=>{
-        const dept=String(r[deptC]||'').trim().toUpperCase();
-        const coa=String(r[coaC]||'').trim();
-        const name=String(r[nameC]||'').trim();
-        const month=getRawMonthForRow(i+2); // +2: 1-indexed + skip header
-        const budget=parseNum(r[budgetC]);
-        if(!coa&&!budget)return;
+      const newMonths=new Set(),map={},nameMap={};
+      for(let r=range.s.r+1;r<=range.e.r;r++){
+        const get=c=>c>=0?ws[XLSX.utils.encode_cell({r,c})]:null;
+        const deptCell=get(deptCol),coaCell=get(coaCol),nameCell=get(nameCol),monthCell=get(monthCol),budgetCell=get(budgetCol);
+        const dept  =deptCell  ?String(deptCell.v).trim().toUpperCase():'';
+        const coa   =coaCell   ?String(coaCell.v).trim():'';
+        const name  =nameCell  ?String(nameCell.v).trim():'';
+        // THIS IS THE FIX: use cell.w (Excel's formatted text) for the month
+        const month =monthKeyFromCell(monthCell);
+        const budget=budgetCell?parseNum(budgetCell.v):0;
+        if(!coa&&!budget)continue;
+        if(month)newMonths.add(month);
         const k=dept+'||'+coa+'||'+month;
         map[k]=(map[k]||0)+budget;
         if(!nameMap[k]&&name)nameMap[k]=name;
-      });
-      // Replace months being uploaded, keep others
+      }
+      // Clear overrides for replaced months
+      newMonths.forEach(mk=>{Object.keys(budgetOverrides).forEach(k=>{if(k.endsWith('||'+mk))delete budgetOverrides[k]})});
       budgetRows=budgetRows.filter(r=>!newMonths.has(r.month));
       const newRows=Object.entries(map).map(([k,budget])=>{
         const[dept,coa,month]=k.split('||');
@@ -479,7 +413,7 @@ function loadBudget(input){
       document.getElementById('lbl-budget').textContent='✓ Monthly budget';
       document.getElementById('fn-budget').textContent=f.name;
       await saveToSheets({type:'budget',budgetRows,budgetOverrides});
-      toast('Budget saved — '+newRows.length+' COA lines for '+[...newMonths].map(fmtMonth).join(', '));
+      toast('Budget saved — '+newRows.length+' lines for '+[...newMonths].map(fmtMonth).join(', '));
       refreshAll();
     }catch(err){toast('Budget file error: '+err.message,true);console.error(err)}
   };rd.readAsBinaryString(f);
@@ -488,7 +422,6 @@ function loadBudget(input){
 // ── Transaction loader ────────────────────────────────────────────────────
 function loadTxn(input){
   const f=input.files[0];if(!f)return;
-  if(!SHEET_URL){toast('Connect to Google Sheets first',true);return}
   const rd=new FileReader();
   rd.onload=async e=>{
     try{
@@ -539,8 +472,7 @@ function parsePB(wb){
   const coaC=findCol(h,'coa','akun'),coaNmC=findCol(h,'coaname','nama coa','nama biaya');
   const amtC=findCol(h,'amount','jumlah','nilai','total');
   const brandC=findCol(h,'branddept','brand/dept','dept','brand','divisi');
-  const catC=findCol(h,'catatan','keterangan','ket');
-  const ketC=findCol(h,'keterangan','ket');
+  const catC=findCol(h,'catatan','keterangan','ket'),ketC=findCol(h,'keterangan','ket');
   return json.map(r=>({
     type:'PB',no:parseNum(r[noC]),tanggal:r[tglC],jatuhTempo:r[jthC],hutang:'211401101',
     coa:String(r[coaC]||'').trim(),coaName:String(r[coaNmC]||'').trim(),
@@ -571,29 +503,23 @@ function getBudget(dept,coa,month){
   return{val:row?Number(row.budget):0,overridden:false};
 }
 async function onBudgetEdit(dept,coa,month,inputEl){
-  const raw=inputEl.value.replace(/\./g,'').replace(/[^0-9]/g,'');
-  const val=parseInt(raw)||0;
-  const k=dept+'||'+coa+'||'+month;
-  budgetOverrides[k]=val;
+  const val=parseInt(inputEl.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;
+  budgetOverrides[dept+'||'+coa+'||'+month]=val;
   inputEl.classList.add('edited');
   await saveToSheets({type:'overrides',budgetOverrides});
   renderRecap();
 }
 async function resetBudgetOverride(dept,coa,month){
-  const k=dept+'||'+coa+'||'+month;
-  delete budgetOverrides[k];
+  delete budgetOverrides[dept+'||'+coa+'||'+month];
   await saveToSheets({type:'overrides',budgetOverrides});
   renderRecap();toast('Budget reset to file value');
 }
-
 function renderRecap(){
   const month=document.getElementById('r-month').value;
   const brand=document.getElementById('r-brand').value;
   const bRows=budgetRows.filter(r=>(!month||r.month===month||!r.month)&&(!brand||r.dept===brand));
   const txRows=cumulLog.filter(r=>!isTax(r.coa)&&r.amount>0&&(!month||r.month===month)&&(!brand||r.brand===brand));
-  if(!bRows.length){
-    document.getElementById('recap-content').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><p>Upload the monthly budget file to get started</p></div>';return;
-  }
+  if(!bRows.length){document.getElementById('recap-content').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><p>Upload the monthly budget file to get started</p></div>';return}
   const actMap={};
   txRows.forEach(r=>{const k=r.brand+'||'+r.coa+'||'+(r.month||'');actMap[k]=(actMap[k]||0)+Number(r.amount)});
   const brands=[...new Set(bRows.map(r=>r.dept))].sort();
@@ -606,17 +532,15 @@ function renderRecap(){
       const act=actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0;
       const bal=budVal-act,p=pct(act,budVal),s=scClass(p);
       brB+=budVal;brA+=act;
-      const dSafe=r.dept.replace(/'/g,"\\'");
+      const dS=r.dept.replace(/'/g,"\\'");
       trs+=`<tr>
         <td class="muted">${r.coa}</td>
         <td>${r.name||'–'}</td>
         <td class="nr" style="padding-right:8px">
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-            <input class="budget-input${overridden?' edited':''}" type="text"
-              value="${budVal.toLocaleString('id-ID')}"
-              onchange="onBudgetEdit('${dSafe}','${r.coa}','${r.month}',this)"
-              title="Click to edit budget">
-            ${overridden?`<span class="reset-pill" onclick="resetBudgetOverride('${dSafe}','${r.coa}','${r.month}')">↺ reset</span>`:''}
+            <input class="budget-input${overridden?' edited':''}" type="text" value="${budVal.toLocaleString('id-ID')}"
+              onchange="onBudgetEdit('${dS}','${r.coa}','${r.month}',this)" title="Click to edit budget">
+            ${overridden?`<span class="reset-pill" onclick="resetBudgetOverride('${dS}','${r.coa}','${r.month}')">↺ reset</span>`:''}
           </div>
         </td>
         <td class="nr" style="${act>budVal?'color:#C0392B;font-weight:600':act===0?'color:var(--text-3)':''}">${act>0?fmt(act):'–'}</td>
@@ -634,22 +558,9 @@ function renderRecap(){
         <div class="brand-stats">Actual <strong>${fmt(brA)}</strong>&ensp;/&ensp;Budget <strong>${fmt(brB)}</strong>&emsp;<span class="status-pill s-${brS}">${brP!==null?brP+'%':'–'}</span></div>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr>
-          <th style="width:95px">COA</th><th>COA name</th>
-          <th class="nr" style="width:150px">Budget (IDR)</th>
-          <th class="nr" style="width:120px">Actual (IDR)</th>
-          <th class="nr" style="width:120px">Balance (IDR)</th>
-          <th class="nr" style="width:56px">%</th>
-          <th style="width:90px"></th><th style="width:64px">Status</th>
-        </tr></thead>
+        <thead><tr><th style="width:95px">COA</th><th>COA name</th><th class="nr" style="width:150px">Budget (IDR)</th><th class="nr" style="width:120px">Actual (IDR)</th><th class="nr" style="width:120px">Balance (IDR)</th><th class="nr" style="width:56px">%</th><th style="width:90px"></th><th style="width:64px">Status</th></tr></thead>
         <tbody>${trs}</tbody>
-        <tr class="tfoot">
-          <td colspan="2">Total — ${br}</td>
-          <td class="nr">${fmt(brB)}</td>
-          <td class="nr" style="${brA>brB?'color:#C0392B':''}">${fmt(brA)}</td>
-          <td class="nr" style="${brBal<0?'color:#C0392B':''}">${fmt(brBal)}</td>
-          <td colspan="3"></td>
-        </tr>
+        <tr class="tfoot"><td colspan="2">Total — ${br}</td><td class="nr">${fmt(brB)}</td><td class="nr" style="${brA>brB?'color:#C0392B':''}">${fmt(brA)}</td><td class="nr" style="${brBal<0?'color:#C0392B':''}">${fmt(brBal)}</td><td colspan="3"></td></tr>
       </table></div>
     </div>`;
   });
@@ -665,38 +576,33 @@ function renderRecap(){
 
 // ── Download recap ────────────────────────────────────────────────────────
 function downloadRecap(){
-  const month=document.getElementById('r-month').value;
-  const brand=document.getElementById('r-brand').value;
+  const month=document.getElementById('r-month').value,brand=document.getElementById('r-brand').value;
   const bRows=budgetRows.filter(r=>(!month||r.month===month||!r.month)&&(!brand||r.dept===brand));
   const txRows=cumulLog.filter(r=>!isTax(r.coa)&&r.amount>0&&(!month||r.month===month)&&(!brand||r.brand===brand));
   if(!bRows.length){toast('No budget data to download',true);return}
-  const actMap={};
-  txRows.forEach(r=>{const k=r.brand+'||'+r.coa+'||'+(r.month||'');actMap[k]=(actMap[k]||0)+Number(r.amount)});
+  const actMap={};txRows.forEach(r=>{const k=r.brand+'||'+r.coa+'||'+(r.month||'');actMap[k]=(actMap[k]||0)+Number(r.amount)});
   const brands=[...new Set(bRows.map(r=>r.dept))].sort();
   const wsData=[['Brand','COA','COA Name','Month','Budget (IDR)','Actual (IDR)','Balance (IDR)','% Used','Status']];
   brands.forEach(br=>{
     bRows.filter(r=>r.dept===br).forEach(r=>{
-      const{val:budVal}=getBudget(r.dept,r.coa,r.month);
+      const{val:bv}=getBudget(r.dept,r.coa,r.month);
       const act=actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0;
-      const p=pct(act,budVal);
-      wsData.push([br,r.coa,r.name,fmtMonth(r.month),budVal,act,budVal-act,p!==null?p+'%':'–',scLabel(p)]);
+      const p=pct(act,bv);
+      wsData.push([br,r.coa,r.name,fmtMonth(r.month),bv,act,bv-act,p!==null?p+'%':'–',scLabel(p)]);
     });
     const brB=bRows.filter(r=>r.dept===br).reduce((s,r)=>s+getBudget(r.dept,r.coa,r.month).val,0);
     const brA=bRows.filter(r=>r.dept===br).reduce((s,r)=>s+(actMap[r.dept+'||'+r.coa+'||'+(r.month||'')]||0),0);
-    wsData.push(['TOTAL — '+br,'','','',brB,brA,brB-brA,pct(brA,brB)!==null?pct(brA,brB)+'%':'–','']);
-    wsData.push([]);
+    wsData.push(['TOTAL — '+br,'','','',brB,brA,brB-brA,pct(brA,brB)!==null?pct(brA,brB)+'%':'–','']);wsData.push([]);
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Budget Recap');
-  const label=(month?fmtMonth(month):'All')+(brand?'_'+brand:'');
-  XLSX.writeFile(wb,'Budget_Recap_'+label.replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  XLSX.writeFile(wb,'Budget_Recap_'+(month?fmtMonth(month):'All').replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
   toast('Recap downloaded');
 }
 
 // ── Budget details ────────────────────────────────────────────────────────
 async function updateLogRow(rowId,field,val){
-  const idx=cumulLog.findIndex(r=>r.rowId===rowId);
-  if(idx<0)return;
+  const idx=cumulLog.findIndex(r=>r.rowId===rowId);if(idx<0)return;
   cumulLog[idx][field]=field==='amount'?parseFloat(val)||0:val;
   await saveToSheets({type:'log',cumulLog});
   if(field==='amount')renderRecap();
@@ -706,87 +612,54 @@ async function deleteLogRow(rowId){
   await saveToSheets({type:'log',cumulLog});
   refreshAll();
 }
-
 function renderLog(){
-  const month=document.getElementById('l-month').value;
-  const brand=document.getElementById('l-brand').value;
-  const type=document.getElementById('l-type').value;
+  const month=document.getElementById('l-month').value,brand=document.getElementById('l-brand').value,type=document.getElementById('l-type').value;
   const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
-  if(!rows.length){
-    document.getElementById('log-content').innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>${cumulLog.length?'No rows match selected filters':'No transactions yet. Upload a budget request list to begin.'}</p></div>`;return;
-  }
-  const sorted=[...rows].sort((a,b)=>{
-    const da=typeof(a.date||a.tanggal)==='number'?a.date||a.tanggal:0;
-    const db=typeof(b.date||b.tanggal)==='number'?b.date||b.tanggal:0;
-    return db-da;
-  });
+  if(!rows.length){document.getElementById('log-content').innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>${cumulLog.length?'No rows match selected filters':'No transactions yet. Upload a budget request list to begin.'}</p></div>`;return}
+  const sorted=[...rows].sort((a,b)=>(typeof(b.date||b.tanggal)==='number'?b.date||b.tanggal:0)-(typeof(a.date||a.tanggal)==='number'?a.date||a.tanggal:0));
   const nonTaxTotal=rows.filter(r=>!isTax(r.coa)&&r.amount>0).reduce((s,r)=>s+Number(r.amount),0);
   const trs=sorted.map(r=>{
     const b=bs(r.brand),d=r.date||r.tanggal,tax=isTax(r.coa),rid=r.rowId||'';
     return`<tr>
       <td class="muted">${fmtDate(d)||'–'}</td>
       <td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${b.bg};color:${b.txt}">${r.brand||'–'}</span></td>
-      <td class="muted">${r.type}</td>
-      <td class="muted">${r.coa}</td>
+      <td class="muted">${r.type}</td><td class="muted">${r.coa}</td>
       <td style="font-size:12px">${r.coaName||'–'}</td>
       <td style="font-size:12px">${(r.type==='PP'?r.namaPemasok:'')||'–'}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${(r.catatan||'').replace(/"/g,'&quot;')}">${r.catatan||'–'}</td>
-      <td><input class="amt-input" type="text" value="${Number(r.amount).toLocaleString('id-ID')}"
-        data-rowid="${rid}" data-field="amount"
-        style="${tax?'color:var(--text-3)':''}"></td>
-      <td><input class="note-input" type="text" value="${(r.note||'').replace(/"/g,'&quot;')}"
-        data-rowid="${rid}" data-field="note"
-        placeholder="Add note…"></td>
+      <td><input class="amt-input" type="text" value="${Number(r.amount).toLocaleString('id-ID')}" data-rowid="${rid}" data-field="amount" style="${tax?'color:var(--text-3)':''}"></td>
+      <td><input class="note-input" type="text" value="${(r.note||'').replace(/"/g,'&quot;')}" data-rowid="${rid}" data-field="note" placeholder="Add note…"></td>
       <td style="text-align:center"><button class="del-row-btn" data-rowid="${rid}">✕</button></td>
     </tr>`;
   }).join('');
-  const logEl = document.getElementById('log-content');
+  const logEl=document.getElementById('log-content');
   logEl.innerHTML=`
     <div class="preview-block">
       <div class="preview-label"><span>${rows.length} rows</span><span style="font-weight:400;color:var(--text-2)">Non-tax total: <strong style="color:var(--text)">${fmt(nonTaxTotal)}</strong> IDR</span></div>
       <div class="table-wrap"><table>
-        <thead><tr>
-          <th style="width:80px">Date</th><th style="width:130px">Brand</th>
-          <th style="width:40px">Type</th><th style="width:90px">COA</th>
-          <th style="width:150px">COA name</th><th style="width:110px">Vendor</th>
-          <th>Description</th>
-          <th class="nr" style="width:125px">Amount (IDR)</th>
-          <th style="width:150px">Note</th><th style="width:40px"></th>
-        </tr></thead>
+        <thead><tr><th style="width:80px">Date</th><th style="width:130px">Brand</th><th style="width:40px">Type</th><th style="width:90px">COA</th><th style="width:150px">COA name</th><th style="width:110px">Vendor</th><th>Description</th><th class="nr" style="width:125px">Amount (IDR)</th><th style="width:150px">Note</th><th style="width:40px"></th></tr></thead>
         <tbody>${trs}</tbody>
         <tr class="tfoot"><td colspan="7">${rows.length} rows</td><td class="nr">${fmt(nonTaxTotal)}</td><td colspan="2"></td></tr>
       </table></div>
     </div>`;
-  // Delegated events — safe after innerHTML is written
-  logEl.onclick = e => {
-    const btn = e.target.closest('.del-row-btn');
-    if(btn){ deleteLogRow(btn.dataset.rowid); }
-  };
-  logEl.onchange = e => {
-    const el = e.target;
-    if(el.classList.contains('amt-input')){
-      updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
-    } else if(el.classList.contains('note-input')){
-      updateLogRow(el.dataset.rowid,'note',el.value);
-    }
+  logEl.onclick=e=>{const btn=e.target.closest('.del-row-btn');if(btn)deleteLogRow(btn.dataset.rowid)};
+  logEl.onchange=e=>{
+    const el=e.target;
+    if(el.classList.contains('amt-input'))updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
+    else if(el.classList.contains('note-input'))updateLogRow(el.dataset.rowid,'note',el.value);
   };
 }
 
 // ── Download details ──────────────────────────────────────────────────────
 function downloadDetails(){
-  const month=document.getElementById('l-month').value;
-  const brand=document.getElementById('l-brand').value;
-  const type=document.getElementById('l-type').value;
+  const month=document.getElementById('l-month').value,brand=document.getElementById('l-brand').value,type=document.getElementById('l-type').value;
   const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
   if(!rows.length){toast('No data to download',true);return}
   const wsData=[['Date','Brand','Type','COA','COA Name','Vendor','Description','Amount (IDR)','Note','Month']];
-  rows.forEach(r=>{
-    wsData.push([fmtDate(r.date||r.tanggal),r.brand,r.type==='PP'?'Pesanan Pembelian':'Pencatatan Beban',r.coa,r.coaName,(r.type==='PP'?r.namaPemasok:'')||'',r.catatan||'',Number(r.amount),r.note||'',fmtMonth(r.month)]);
-  });
+  rows.forEach(r=>wsData.push([fmtDate(r.date||r.tanggal),r.brand,r.type==='PP'?'Pesanan Pembelian':'Pencatatan Beban',r.coa,r.coaName,(r.type==='PP'?r.namaPemasok:'')||'',r.catatan||'',Number(r.amount),r.note||'',fmtMonth(r.month)]));
   const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Budget Details');
-  const label=(month?fmtMonth(month):'All')+(brand?'_'+brand:'');
-  XLSX.writeFile(wb,'Budget_Details_'+label.replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  XLSX.writeFile(wb,'Budget_Details_'+(month?fmtMonth(month):'All').replace(/\s/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
   toast('Details downloaded');
 }
 
@@ -804,13 +677,8 @@ function renderTemplatePP(){
   el.innerHTML=`
     <div class="gen-notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span>Generated from the <strong>latest uploaded</strong> budget request list only. ${nos.length} PO header${nos.length>1?'s':''}, ${latestPP.length+nos.length} total rows.</span></div>
-    <div class="preview-block">
-      <div class="preview-label"><span>Preview${nos.length>4?' (first 4 POs)':''}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Row type</th><th>No Biaya</th><th>Nama Biaya</th><th class="nr">Nilai Biaya</th><th>Catatan Biaya</th><th>Nama Dept Biaya</th><th>Kategori Keu. 1</th></tr></thead>
-        <tbody>${preview.join('')}</tbody>
-      </table></div>
-    </div>
+    <div class="preview-block"><div class="preview-label"><span>Preview${nos.length>4?' (first 4 POs)':''}</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Row type</th><th>No Biaya</th><th>Nama Biaya</th><th class="nr">Nilai Biaya</th><th>Catatan Biaya</th><th>Nama Dept Biaya</th><th>Kategori Keu. 1</th></tr></thead><tbody>${preview.join('')}</tbody></table></div></div>
     <button class="dl-btn primary" onclick="downloadPP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Pesanan Pembelian template (.xlsx)</button>`;
 }
 function renderTemplatePB(){
@@ -826,13 +694,8 @@ function renderTemplatePB(){
   el.innerHTML=`
     <div class="gen-notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span>Generated from the <strong>latest uploaded</strong> budget request list only. ${nos.length} header${nos.length>1?'s':''}, ${latestPB.length+nos.length} total rows. Hutang Beban always <strong>211401101</strong>.</span></div>
-    <div class="preview-block">
-      <div class="preview-label"><span>Preview${nos.length>4?' (first 4 entries)':''}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Row type</th><th>No Akun</th><th>Nama Akun</th><th class="nr">Nilai Akun</th><th>Nama Departemen</th><th>Catatan Akun</th></tr></thead>
-        <tbody>${preview.join('')}</tbody>
-      </table></div>
-    </div>
+    <div class="preview-block"><div class="preview-label"><span>Preview${nos.length>4?' (first 4 entries)':''}</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Row type</th><th>No Akun</th><th>Nama Akun</th><th class="nr">Nilai Akun</th><th>Nama Departemen</th><th>Catatan Akun</th></tr></thead><tbody>${preview.join('')}</tbody></table></div></div>
     <button class="dl-btn primary" onclick="downloadPB()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Pencatatan Beban template (.xlsx)</button>`;
 }
 function downloadPP(){
@@ -845,10 +708,8 @@ function downloadPP(){
   const nos=[...new Set(latestPP.map(r=>r.no))].sort((a,b)=>a-b);
   nos.forEach(no=>{
     const g=latestPP.filter(r=>r.no===no),f=g[0];
-    const hRow=Array(W).fill(null);
-    hRow[0]='HEADER';hRow[2]=fmtDate(f.date);hRow[3]=f.pemasok;hRow[4]=f.alamat;hRow[5]='Tidak';hRow[6]='Tidak';hRow[9]=f.keterangan;
-    wsData.push(hRow);
-    g.forEach(r=>{const eRow=Array(W).fill(null);eRow[0]='EXPENSE';eRow[1]=r.coa;eRow[2]=r.coaName;eRow[3]=r.amount;eRow[4]=r.catatan;eRow[5]=r.brand;eRow[7]=r.brand;wsData.push(eRow)});
+    const h=Array(W).fill(null);h[0]='HEADER';h[2]=fmtDate(f.date);h[3]=f.pemasok;h[4]=f.alamat;h[5]='Tidak';h[6]='Tidak';h[9]=f.keterangan;wsData.push(h);
+    g.forEach(r=>{const e=Array(W).fill(null);e[0]='EXPENSE';e[1]=r.coa;e[2]=r.coaName;e[3]=r.amount;e[4]=r.catatan;e[5]=r.brand;e[7]=r.brand;wsData.push(e)});
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Template Pesanan Pembelian');
@@ -864,10 +725,8 @@ function downloadPB(){
   const nos=[...new Set(latestPB.map(r=>r.no))].sort((a,b)=>a-b);
   nos.forEach(no=>{
     const g=latestPB.filter(r=>r.no===no),f=g[0];
-    const hRow=Array(W).fill(null);
-    hRow[0]='HEADER';hRow[2]='211401101';hRow[3]=fmtDate(f.tanggal);hRow[4]=fmtDate(f.jatuhTempo);hRow[6]=f.keterangan;
-    wsData.push(hRow);
-    g.forEach(r=>{const aRow=Array(W).fill(null);aRow[0]='ACCOUNT';aRow[1]=r.coa;aRow[2]=r.coaName;aRow[3]=r.amount;aRow[4]=r.brand;aRow[6]=r.catatan;aRow[7]=r.brand;wsData.push(aRow)});
+    const h=Array(W).fill(null);h[0]='HEADER';h[2]='211401101';h[3]=fmtDate(f.tanggal);h[4]=fmtDate(f.jatuhTempo);h[6]=f.keterangan;wsData.push(h);
+    g.forEach(r=>{const a=Array(W).fill(null);a[0]='ACCOUNT';a[1]=r.coa;a[2]=r.coaName;a[3]=r.amount;a[4]=r.brand;a[6]=r.catatan;a[7]=r.brand;wsData.push(a)});
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData),wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Template Pencatatan Beban');
@@ -876,31 +735,7 @@ function downloadPB(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
-// Check if sheet URL is stored, show setup prompt if not
-window.addEventListener('DOMContentLoaded',()=>{
-  if(SHEET_URL){
-    loadFromSheets();
-  } else {
-    // Show setup banner inside main
-    const banner=document.createElement('div');
-    banner.id='setup-banner';
-    banner.className='setup-banner';
-    banner.innerHTML=`
-      <h3>🔗 Connect to Google Sheets to get started</h3>
-      <p>This tool uses a shared Google Sheet so your whole team sees the same data. You only need to do this once — paste your Apps Script URL below.</p>
-      <p style="margin-bottom:10px">Don't have one yet? Follow the <strong>Setup Guide</strong> included with this file.</p>
-      <input type="text" id="inline-url-input" placeholder="https://script.google.com/macros/s/…/exec">
-      <button onclick="saveFromBanner()">Connect</button>`;
-    document.getElementById('recap-content').prepend(banner);
-  }
-});
-function saveFromBanner(){
-  const url=document.getElementById('inline-url-input')?.value?.trim();
-  if(!url){toast('Please enter the Apps Script URL',true);return}
-  SHEET_URL=url;localStorage.setItem('mbt_sheet_url',url);
-  document.getElementById('setup-banner')?.remove();
-  toast('Connecting…');loadFromSheets();
-}
+window.addEventListener('DOMContentLoaded',()=>loadFromSheets());
 </script>
 </body>
 </html>
