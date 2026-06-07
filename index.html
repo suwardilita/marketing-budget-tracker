@@ -224,76 +224,61 @@ let budgetRows=[],cumulLog=[],latestPP=[],latestPB=[],budgetOverrides={};
 const SHEET_URL='https://script.google.com/macros/s/AKfycbx93TD_4QP1h3DGtSC5bnNtX_RnOMk4uAHwmqrwEUcZgx2pYhYmvZn_A0ePB8w0ZkMo/exec';
 
 // ── Date helpers ──────────────────────────────────────────────────────────
-// THE KEY INSIGHT: read cell.w (Excel's own formatted text) first.
-// cell.w for a mm/yyyy date looks like "05/2026" — parse that directly.
-// Only fall back to serial arithmetic if cell.w is unavailable.
-// This completely bypasses all timezone issues.
+// Use XLSX.SSF.parse_date_code — XLSX.js's own built-in parser.
+// This is timezone-safe and handles all Excel date formats correctly.
 
-function monthKeyFromCell(cell){
-  if(!cell) return '';
-  // Prefer the formatted text Excel already computed — e.g. "05/2026"
-  if(cell.w){
-    const w=cell.w.trim();
-    // mm/yyyy
-    let m=w.match(/^(\d{1,2})\/(\d{4})$/);
-    if(m) return m[2]+'-'+m[1].padStart(2,'0');
-    // yyyy-mm or yyyy/mm
-    m=w.match(/^(\d{4})[-\/](\d{1,2})$/);
-    if(m) return m[1]+'-'+m[2].padStart(2,'0');
-    // mmm-yyyy or mmm yyyy e.g. "May-2026"
-    const months={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-    m=w.match(/^([a-zA-Z]{3})[-\s](\d{4})$/);
-    if(m&&months[m[1].toLowerCase()]) return m[2]+'-'+months[m[1].toLowerCase()];
-  }
-  // Fall back: serial → local date (no UTC)
-  if(typeof cell.v==='number'){
-    let s=cell.v;
-    if(s>=60) s-=1; // Excel leap year bug
-    const d=new Date(new Date(1900,0,1).getTime()+(s-1)*86400000);
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-  }
-  // String fallback
-  if(typeof cell.v==='string'){
-    const m=cell.v.match(/(\d{4})[-\/](\d{1,2})/);
-    if(m) return m[1]+'-'+m[2].padStart(2,'0');
-  }
-  return '';
+function serialToDateParts(serial){
+  if(typeof serial!=='number'||serial<=0) return null;
+  return XLSX.SSF.parse_date_code(serial);
 }
 
-// For transaction dates (dd/mm/yyyy serials)
-function serialToLocalDate(serial){
-  if(typeof serial!=='number') return null;
-  let s=serial;
-  if(s>=60) s-=1;
-  return new Date(new Date(1900,0,1).getTime()+(s-1)*86400000);
+function monthKeyFromSerial(serial){
+  const d=serialToDateParts(serial);
+  if(!d) return '';
+  return d.y+'-'+String(d.m).padStart(2,'0');
+}
+
+function fmtDateFromSerial(serial){
+  const d=serialToDateParts(serial);
+  if(!d) return '';
+  return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
 }
 
 function toMonthKey(v){
   if(!v&&v!==0) return '';
-  if(typeof v==='number'){
-    const d=serialToLocalDate(v); if(!d) return '';
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-  }
+  // Raw serial number — use XLSX.SSF
+  if(typeof v==='number') return monthKeyFromSerial(v);
+  // Already a JS Date (shouldn't happen with cellDates:false, but just in case)
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
   }
-  const s=String(v),m=s.match(/(\d{4})[-\/](\d{1,2})/);
+  // String — parse directly
+  const s=String(v);
+  const m=s.match(/(\d{4})[-\/](\d{1,2})/);
   return m?m[1]+'-'+m[2].padStart(2,'0'):'';
 }
 
 function fmtDate(v){
   if(!v) return '';
-  if(typeof v==='number'){
-    const d=serialToLocalDate(v); if(!d) return '';
-    return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
-  }
+  if(typeof v==='number') return fmtDateFromSerial(v);
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return String(v.getDate()).padStart(2,'0')+'/'+String(v.getMonth()+1).padStart(2,'0')+'/'+v.getFullYear();
   }
   const s=String(v),m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m?m[3]+'/'+m[2]+'/'+m[1]:s.slice(0,10);
+}
+
+// monthKeyFromCell: used in budget loader — reads cell.v as serial via XLSX.SSF
+function monthKeyFromCell(cell){
+  if(!cell) return '';
+  if(typeof cell.v==='number') return monthKeyFromSerial(cell.v);
+  if(typeof cell.v==='string'){
+    const m=cell.v.match(/(\d{4})[-\/](\d{1,2})/);
+    if(m) return m[1]+'-'+m[2].padStart(2,'0');
+  }
+  return '';
 }
 
 function fmtMonth(k){
