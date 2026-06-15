@@ -646,8 +646,16 @@ function renderLog(){
   const nonTaxTotal=rows.filter(r=>!isTax(r.coa)&&r.amount>0).reduce((s,r)=>s+Number(r.amount),0);
   const trs=sorted.map(r=>{
     const b=bs(r.brand),d=r.date||r.tanggal,tax=isTax(r.coa),rid=r.rowId||'';
+    const dateVal=fmtDate(d)||'';
+    const dateField=r.type==='PP'?'date':'tanggal';
     return`<tr>
-      <td class="muted">${fmtDate(d)||'–'}</td>
+      <td style="width:105px">
+        <input class="amt-input" type="text" value="${dateVal}"
+          data-rowid="${rid}" data-field="${dateField}"
+          placeholder="DD/MM/YYYY"
+          style="width:95px;font-size:12px;${!dateVal?'border-color:#C0392B;color:#C0392B;':''}"
+          title="${dateVal?'Date (click to edit)':'Missing date — enter DD/MM/YYYY'}">
+      </td>
       <td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${b.bg};color:${b.txt}">${r.brand||'–'}</span></td>
       <td class="muted">${r.type}</td><td class="muted">${r.coa}</td>
       <td style="font-size:12px">${r.coaName||'–'}</td>
@@ -671,8 +679,34 @@ function renderLog(){
   logEl.onclick=e=>{const btn=e.target.closest('.del-row-btn');if(btn)deleteLogRow(btn.dataset.rowid)};
   logEl.onchange=e=>{
     const el=e.target;
-    if(el.classList.contains('amt-input'))updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
-    else if(el.classList.contains('note-input'))updateLogRow(el.dataset.rowid,'note',el.value);
+    if(el.classList.contains('amt-input')){
+      const field=el.dataset.field;
+      if(field==='date'||field==='tanggal'){
+        // Validate and store date as DD/MM/YYYY
+        const v=el.value.trim();
+        if(v&&!/^\d{2}\/\d{2}\/\d{4}$/.test(v)){
+          toast('Date must be DD/MM/YYYY (e.g. 04/06/2026)',true);
+          el.style.borderColor='#C0392B';
+          return;
+        }
+        // Also update the month key from the new date
+        const idx=cumulLog.findIndex(r=>r.rowId===el.dataset.rowid);
+        if(idx>=0){
+          cumulLog[idx][field]=v;
+          if(v){
+            const parts=v.split('/');
+            cumulLog[idx].month=parts[2]+'-'+parts[1];
+          }
+          saveToSheets({type:'log',cumulLog});
+          renderLog();
+          renderRecap();
+        }
+      } else {
+        updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
+      }
+    } else if(el.classList.contains('note-input')){
+      updateLogRow(el.dataset.rowid,'note',el.value);
+    }
   };
 }
 
