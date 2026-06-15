@@ -254,24 +254,47 @@ function toMonthKey(v){
     if(isNaN(v.getTime())) return '';
     return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
   }
-  const s=String(v);
-  // Handle "DD/MM/YYYY" formatted strings (what we now store)
+  const s=String(v).trim();
+  // DD/MM/YYYY (our stored format)
   const dm=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if(dm) return dm[3]+'-'+dm[2];
-  // Handle "YYYY-MM" or "YYYY-MM-DD"
-  const ym=s.match(/(\d{4})[-\/](\d{1,2})/);
-  return ym?ym[1]+'-'+ym[2].padStart(2,'0'):'';
+  // YYYY-MM or YYYY-MM-DD
+  const ym=s.match(/^(\d{4})[-\/](\d{1,2})/);
+  if(ym) return ym[1]+'-'+ym[2].padStart(2,'0');
+  // d-mmm-yyyy Excel string
+  const dmm=parseDMMMDate(s);
+  if(dmm) return dmm.y+'-'+String(dmm.m).padStart(2,'0');
+  return '';
+}
+
+const MONTH_NAMES={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+
+function parseDMMMDate(s){
+  // Handles "15-Jun-2026", "15-Jun-26", "15 Jun 2026", "Jun 15 2026" etc.
+  const m=String(s).match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s]?(\d{2,4})$/);
+  if(m){
+    const d=parseInt(m[1]);
+    const mo=MONTH_NAMES[m[2].toLowerCase()];
+    let y=parseInt(m[3]);
+    if(y<100) y+=2000;
+    if(mo) return{d,m:mo,y};
+  }
+  return null;
 }
 
 function fmtDate(v){
   if(!v) return '';
-  // Already a formatted string like "04/06/2026" — return as-is
   if(typeof v==='string'){
-    if(/^\d{2}\/\d{2}\/\d{4}$/.test(v.trim())) return v.trim();
-    // YYYY-MM-DD format
-    const m=v.match(/(\d{4})-(\d{2})-(\d{2})/);
-    if(m) return m[3]+'/'+m[2]+'/'+m[1];
-    return v;
+    const s=v.trim();
+    // Already DD/MM/YYYY
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+    // YYYY-MM-DD
+    const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
+    // d-mmm-yyyy or d-mmm-yy (Excel formatted date string)
+    const dmm=parseDMMMDate(s);
+    if(dmm) return String(dmm.d).padStart(2,'0')+'/'+String(dmm.m).padStart(2,'0')+'/'+dmm.y;
+    return s;
   }
   if(typeof v==='number') return fmtDateFromSerial(v);
   if(v instanceof Date){
@@ -640,9 +663,14 @@ function renderLog(){
   const month=document.getElementById('l-month').value,brand=document.getElementById('l-brand').value,type=document.getElementById('l-type').value;
   const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
   if(!rows.length){document.getElementById('log-content').innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>${cumulLog.length?'No rows match selected filters':'No transactions yet. Upload a budget request list to begin.'}</p></div>`;return}
-  // Sort by date string "DD/MM/YYYY" — convert to YYYYMMDD for correct sort
-  const dateToSort=s=>{if(!s||typeof s!=='string')return'';const m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+m[2]+m[1]:'';};
-  const sorted=[...rows].sort((a,b)=>dateToSort(b.date||b.tanggal).localeCompare(dateToSort(a.date||a.tanggal)));
+  // Sort descending by date — handles both "DD/MM/YYYY" strings and numeric serials
+  const dateToNum=v=>{
+    if(!v) return 0;
+    if(typeof v==='number') return v; // serial — already numeric, higher = later
+    const m=String(v).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    return m?parseInt(m[3]+m[2]+m[1]):0; // YYYYMMDD integer
+  };
+  const sorted=[...rows].sort((a,b)=>dateToNum(b.date||b.tanggal)-dateToNum(a.date||a.tanggal));
   const nonTaxTotal=rows.filter(r=>!isTax(r.coa)&&r.amount>0).reduce((s,r)=>s+Number(r.amount),0);
   const trs=sorted.map(r=>{
     const b=bs(r.brand),d=r.date||r.tanggal,tax=isTax(r.coa),rid=r.rowId||'';
