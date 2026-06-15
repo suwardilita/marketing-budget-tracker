@@ -249,28 +249,36 @@ function fmtDateFromSerial(serial){
 
 function toMonthKey(v){
   if(!v&&v!==0) return '';
-  // Raw serial number — use XLSX.SSF
   if(typeof v==='number') return monthKeyFromSerial(v);
-  // Already a JS Date (shouldn't happen with cellDates:false, but just in case)
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
   }
-  // String — parse directly
   const s=String(v);
-  const m=s.match(/(\d{4})[-\/](\d{1,2})/);
-  return m?m[1]+'-'+m[2].padStart(2,'0'):'';
+  // Handle "DD/MM/YYYY" formatted strings (what we now store)
+  const dm=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(dm) return dm[3]+'-'+dm[2];
+  // Handle "YYYY-MM" or "YYYY-MM-DD"
+  const ym=s.match(/(\d{4})[-\/](\d{1,2})/);
+  return ym?ym[1]+'-'+ym[2].padStart(2,'0'):'';
 }
 
 function fmtDate(v){
   if(!v) return '';
+  // Already a formatted string like "04/06/2026" — return as-is
+  if(typeof v==='string'){
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(v.trim())) return v.trim();
+    // YYYY-MM-DD format
+    const m=v.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return m[3]+'/'+m[2]+'/'+m[1];
+    return v;
+  }
   if(typeof v==='number') return fmtDateFromSerial(v);
   if(v instanceof Date){
     if(isNaN(v.getTime())) return '';
     return String(v.getDate()).padStart(2,'0')+'/'+String(v.getMonth()+1).padStart(2,'0')+'/'+v.getFullYear();
   }
-  const s=String(v),m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  return m?m[3]+'/'+m[2]+'/'+m[1]:s.slice(0,10);
+  return '';
 }
 
 // monthKeyFromCell: used in budget loader — reads cell.v as serial via XLSX.SSF
@@ -466,7 +474,8 @@ function parsePP(wb){
   const catatanC=findCol(h,'catatanbiaya','catatan biaya','catatan');
   const ketC=findCol(h,'keterangan','ket','desc');
   return json.map(r=>({
-    type:'PP',no:parseNum(r[noC]),date:r[dateC],
+    type:'PP',no:parseNum(r[noC]),
+    date:fmtDate(r[dateC]),       // store as "DD/MM/YYYY" string — safe for Sheets
     pemasok:String(r[pemasokC]||'').trim(),namaPemasok:String(r[nmC]||'').trim(),
     alamat:String(r[alamatC]||'').trim(),coa:String(r[coaC]||'').trim(),
     coaName:String(r[coaNmC]||'').trim(),amount:parseNum(r[amtC]),
@@ -486,7 +495,10 @@ function parsePB(wb){
   const brandC=findCol(h,'branddept','brand/dept','dept','brand','divisi');
   const catC=findCol(h,'catatan','keterangan','ket'),ketC=findCol(h,'keterangan','ket');
   return json.map(r=>({
-    type:'PB',no:parseNum(r[noC]),tanggal:r[tglC],jatuhTempo:r[jthC],hutang:'211401101',
+    type:'PB',no:parseNum(r[noC]),
+    tanggal:fmtDate(r[tglC]),          // store as "DD/MM/YYYY" string
+    jatuhTempo:fmtDate(r[jthC]),       // store as "DD/MM/YYYY" string
+    hutang:'211401101',
     coa:String(r[coaC]||'').trim(),coaName:String(r[coaNmC]||'').trim(),
     amount:parseNum(r[amtC]),brand:String(r[brandC]||'').trim().toUpperCase(),
     catatan:String(r[catC]||'').trim(),keterangan:String(r[ketC]||'').trim(),
@@ -628,7 +640,9 @@ function renderLog(){
   const month=document.getElementById('l-month').value,brand=document.getElementById('l-brand').value,type=document.getElementById('l-type').value;
   const rows=cumulLog.filter(r=>(!month||r.month===month)&&(!brand||r.brand===brand)&&(!type||r.type===type));
   if(!rows.length){document.getElementById('log-content').innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>${cumulLog.length?'No rows match selected filters':'No transactions yet. Upload a budget request list to begin.'}</p></div>`;return}
-  const sorted=[...rows].sort((a,b)=>(typeof(b.date||b.tanggal)==='number'?b.date||b.tanggal:0)-(typeof(a.date||a.tanggal)==='number'?a.date||a.tanggal:0));
+  // Sort by date string "DD/MM/YYYY" — convert to YYYYMMDD for correct sort
+  const dateToSort=s=>{if(!s||typeof s!=='string')return'';const m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+m[2]+m[1]:'';};
+  const sorted=[...rows].sort((a,b)=>dateToSort(b.date||b.tanggal).localeCompare(dateToSort(a.date||a.tanggal)));
   const nonTaxTotal=rows.filter(r=>!isTax(r.coa)&&r.amount>0).reduce((s,r)=>s+Number(r.amount),0);
   const trs=sorted.map(r=>{
     const b=bs(r.brand),d=r.date||r.tanggal,tax=isTax(r.coa),rid=r.rowId||'';
