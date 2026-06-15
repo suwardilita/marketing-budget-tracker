@@ -677,29 +677,33 @@ function renderLog(){
       </table></div>
     </div>`;
   logEl.onclick=e=>{const btn=e.target.closest('.del-row-btn');if(btn)deleteLogRow(btn.dataset.rowid)};
-  logEl.onchange=e=>{
+  logEl.onchange=async e=>{
     const el=e.target;
     if(el.classList.contains('amt-input')){
       const field=el.dataset.field;
       if(field==='date'||field==='tanggal'){
-        // Validate and store date as DD/MM/YYYY
-        const v=el.value.trim();
-        if(v&&!/^\d{2}\/\d{2}\/\d{4}$/.test(v)){
-          toast('Date must be DD/MM/YYYY (e.g. 04/06/2026)',true);
-          el.style.borderColor='#C0392B';
-          return;
-        }
-        // Also update the month key from the new date
-        const idx=cumulLog.findIndex(r=>r.rowId===el.dataset.rowid);
-        if(idx>=0){
-          cumulLog[idx][field]=v;
-          if(v){
-            const parts=v.split('/');
-            cumulLog[idx].month=parts[2]+'-'+parts[1];
+        // Accept D/M/YYYY or DD/MM/YYYY — auto-pad
+        let v=el.value.trim();
+        if(v){
+          const parts=v.split('/');
+          if(parts.length===3){
+            v=parts[0].padStart(2,'0')+'/'+parts[1].padStart(2,'0')+'/'+parts[2];
           }
-          saveToSheets({type:'log',cumulLog});
-          renderLog();
-          renderRecap();
+          if(!/^\d{2}\/\d{2}\/\d{4}$/.test(v)){
+            toast('Date must be DD/MM/YYYY — e.g. 04/06/2026',true);
+            el.style.borderColor='#C0392B';
+            return;
+          }
+        }
+        el.value=v;
+        const rowIdx=cumulLog.findIndex(r=>r.rowId===el.dataset.rowid);
+        if(rowIdx>=0){
+          cumulLog[rowIdx][field]=v;
+          if(v){const p=v.split('/');cumulLog[rowIdx].month=p[2]+'-'+p[1];}
+          el.style.borderColor='';
+          await saveToSheets({type:'log',cumulLog});
+          toast('Date saved — '+v);
+          renderLog();renderRecap();
         }
       } else {
         updateLogRow(el.dataset.rowid,'amount',el.value.replace(/\./g,'').replace(/[^0-9.\-]/g,''));
