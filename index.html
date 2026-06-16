@@ -348,9 +348,6 @@ async function loadFromSheets(){
   if(data.budgetRows)  budgetRows=data.budgetRows;
   if(data.cumulLog)    cumulLog=data.cumulLog;
   if(data.budgetOverrides) budgetOverrides=data.budgetOverrides;
-  // DEBUG — check what tanggal looks like after loading from Sheets
-  const pbLoaded=cumulLog.find(r=>r.type==='PB');
-  if(pbLoaded) console.log('[LOAD DEBUG] PB row tanggal after load:',pbLoaded.tanggal,'month:',pbLoaded.month,'type:',typeof pbLoaded.tanggal);
   // Record whether data existed on this load — used as a safety check
   // before any future write that would clear the sheet.
   cumulLogHadDataOnLoad   = cumulLog.length>0;
@@ -456,9 +453,6 @@ function loadTxn(input){
       const batchId=Date.now(),batchDate=new Date().toLocaleDateString('id-ID');
       const newRows=[...latestPP,...latestPB].map(r=>({...r,batchId,batchDate,fileName:f.name,note:'',rowId:Math.random().toString(36).slice(2)}));
       cumulLog=[...cumulLog,...newRows];
-      // DEBUG
-      const pbSample=newRows.find(r=>r.type==='PB');
-      if(pbSample) console.log('[SAVE DEBUG] PB row tanggal before save:',pbSample.tanggal,'month:',pbSample.month);
       document.getElementById('btn-txn').classList.add('uploaded');
       document.getElementById('lbl-txn').textContent='✓ Budget request list';
       document.getElementById('fn-txn').textContent=f.name;
