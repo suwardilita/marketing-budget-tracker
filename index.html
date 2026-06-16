@@ -218,9 +218,10 @@ const TAX_COAS=new Set(['111901201','111901202','211601101','211601102','2116011
 function isTax(c){return TAX_COAS.has(String(c).trim())}
 
 let budgetRows=[],cumulLog=[],latestPP=[],latestPB=[],budgetOverrides={};
-let sheetsLoadedOnce=false;        // becomes true only after a successful read
-let cumulLogHadDataOnLoad=false;   // true if cumulLog was non-empty on first load
-let budgetRowsHadDataOnLoad=false; // true if budgetRows was non-empty on first load
+let sheetsLoadedOnce=false;
+let cumulLogHadDataOnLoad=false;
+let budgetRowsHadDataOnLoad=false;
+let isSaving=false;   // lock to prevent concurrent saves
 
 // ── IMPORTANT: hardcode your Apps Script URL here ─────────────────────────
 // Replace the URL below with your own if you redeploy
@@ -261,39 +262,16 @@ function toMonthKey(v){
   // YYYY-MM or YYYY-MM-DD
   const ym=s.match(/^(\d{4})[-\/](\d{1,2})/);
   if(ym) return ym[1]+'-'+ym[2].padStart(2,'0');
-  // d-mmm-yyyy Excel string
-  const dmm=parseDMMMDate(s);
-  if(dmm) return dmm.y+'-'+String(dmm.m).padStart(2,'0');
   return '';
-}
-
-const MONTH_NAMES={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-
-function parseDMMMDate(s){
-  // Handles "15-Jun-2026", "15-Jun-26", "15 Jun 2026", "Jun 15 2026" etc.
-  const m=String(s).match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s]?(\d{2,4})$/);
-  if(m){
-    const d=parseInt(m[1]);
-    const mo=MONTH_NAMES[m[2].toLowerCase()];
-    let y=parseInt(m[3]);
-    if(y<100) y+=2000;
-    if(mo) return{d,m:mo,y};
-  }
-  return null;
 }
 
 function fmtDate(v){
   if(!v) return '';
   if(typeof v==='string'){
     const s=v.trim();
-    // Already DD/MM/YYYY
     if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
-    // YYYY-MM-DD
     const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
-    // d-mmm-yyyy or d-mmm-yy (Excel formatted date string)
-    const dmm=parseDMMMDate(s);
-    if(dmm) return String(dmm.d).padStart(2,'0')+'/'+String(dmm.m).padStart(2,'0')+'/'+dmm.y;
     return s;
   }
   if(typeof v==='number') return fmtDateFromSerial(v);
@@ -380,20 +358,21 @@ async function loadFromSheets(){
   toast('Data loaded — '+cumulLog.length+' transactions, '+budgetRows.length+' budget lines');
 }
 async function saveToSheets(payload){
-  // SAFETY GUARD: never send an empty cumulLog/budgetRows array if we haven't
-  // successfully loaded data yet — this prevents accidentally wiping the
-  // Google Sheet if a save fires before the initial load completes.
   if(!sheetsLoadedOnce){
-    toast('Data not loaded yet — please wait and try again',true);
+    toast('Data not loaded yet — please wait',true);
     return;
   }
-  if(payload.type==='log' && (!payload.cumulLog || payload.cumulLog.length===0) && cumulLogHadDataOnLoad){
+  if(payload.type==='log' && (!payload.cumulLog||payload.cumulLog.length===0) && cumulLogHadDataOnLoad){
     if(!confirm('This will delete ALL transaction data. Are you sure?')) return;
   }
-  if(payload.type==='budget' && (!payload.budgetRows || payload.budgetRows.length===0) && budgetRowsHadDataOnLoad){
+  if(payload.type==='budget' && (!payload.budgetRows||payload.budgetRows.length===0) && budgetRowsHadDataOnLoad){
     if(!confirm('This will delete ALL budget data. Are you sure?')) return;
   }
-  await sheetsRequest('write',payload);
+  // Lock: wait for any in-progress save to finish before starting a new one
+  while(isSaving){ await new Promise(r=>setTimeout(r,200)); }
+  isSaving=true;
+  try{ await sheetsRequest('write',payload); }
+  finally{ isSaving=false; }
 }
 
 // ── Nav ───────────────────────────────────────────────────────────────────
@@ -509,7 +488,9 @@ function parsePP(wb){
 }
 function parsePB(wb){
   const ws=wb.Sheets['Pencatatan Beban'];if(!ws)return[];
-  const json=XLSX.utils.sheet_to_json(ws,{defval:'',cellDates:false});if(!json.length)return[];
+  // Use cellDates:true so d-mmm formatted date cells return as Date objects
+  // which fmtDate() handles correctly → "DD/MM/YYYY" string stored in Sheets
+  const json=XLSX.utils.sheet_to_json(ws,{defval:'',cellDates:true});if(!json.length)return[];
   const h=Object.keys(json[0]);
   const noC=findCol(h,'no.','no'),tglC=findCol(h,'tanggal','date','tgl');
   const jthC=findCol(h,'jatuhtempo','tanggal jatuh tempo','jatuh tempo');
@@ -695,6 +676,7 @@ function renderLog(){
     </tr>`;
   }).join('');
   const logEl=document.getElementById('log-content');
+  logEl._rendering=true; // prevent onchange during re-render
   logEl.innerHTML=`
     <div class="preview-block">
       <div class="preview-label"><span>${rows.length} rows</span><span style="font-weight:400;color:var(--text-2)">Non-tax total: <strong style="color:var(--text)">${fmt(nonTaxTotal)}</strong> IDR</span></div>
@@ -705,7 +687,9 @@ function renderLog(){
       </table></div>
     </div>`;
   logEl.onclick=e=>{const btn=e.target.closest('.del-row-btn');if(btn)deleteLogRow(btn.dataset.rowid)};
+  logEl._rendering=false; // re-enable onchange after render
   logEl.onchange=async e=>{
+    if(logEl._rendering) return; // ignore events fired during render
     const el=e.target;
     if(el.classList.contains('amt-input')){
       const field=el.dataset.field;
