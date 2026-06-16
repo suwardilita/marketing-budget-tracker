@@ -498,6 +498,12 @@ function parsePB(wb){
   const amtC=findCol(h,'amount','jumlah','nilai','total');
   const brandC=findCol(h,'branddept','brand/dept','dept','brand','divisi');
   const catC=findCol(h,'catatan','keterangan','ket'),ketC=findCol(h,'keterangan','ket');
+  // DEBUG — remove after confirming dates work
+  if(json.length>0){
+    const sample=json[0];
+    console.log('[PB DEBUG] tglC=',tglC,'value=',sample[tglC],'type=',typeof sample[tglC],'instanceof Date=',sample[tglC] instanceof Date);
+    console.log('[PB DEBUG] fmtDate result=',fmtDate(sample[tglC]));
+  }
   return json.map(r=>({
     type:'PB',no:parseNum(r[noC]),
     tanggal:fmtDate(r[tglC]),          // store as "DD/MM/YYYY" string
