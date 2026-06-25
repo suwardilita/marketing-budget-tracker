@@ -222,6 +222,7 @@ let sheetsLoadedOnce=false;
 let cumulLogHadDataOnLoad=false;
 let budgetRowsHadDataOnLoad=false;
 let isSaving=false;   // lock to prevent concurrent saves
+let sheetVersion='';  // tracks Sheet version to detect concurrent edits
 
 // ── IMPORTANT: hardcode your Apps Script URL here ─────────────────────────
 // Replace the URL below with your own if you redeploy
@@ -330,7 +331,10 @@ async function sheetsRequest(action,payload={}){
       ?await fetch(url)
       :await fetch(url,{method:'POST',body:JSON.stringify({action,...payload})});
     const data=JSON.parse(await resp.text());
-    setSyncing(false);return data;
+    setSyncing(false);
+    // Track version token so we can detect concurrent edits
+    if(data&&data.version) sheetVersion=data.version;
+    return data;
   }catch(e){
     setSyncing(false);
     toast('Sheets sync error: '+e.message,true);
@@ -371,7 +375,15 @@ async function saveToSheets(payload){
   // Lock: wait for any in-progress save to finish before starting a new one
   while(isSaving){ await new Promise(r=>setTimeout(r,200)); }
   isSaving=true;
-  try{ await sheetsRequest('write',payload); }
+  try{
+    // Include current version so Apps Script can detect conflicts
+    const result=await sheetsRequest('write',{...payload,clientVersion:sheetVersion});
+    if(result&&result.conflict){
+      toast('⚠️ Someone else just saved data. Refreshing to get latest — please redo your change.',true);
+      setTimeout(()=>loadFromSheets(),1500);
+      return;
+    }
+  }
   finally{ isSaving=false; }
 }
 
@@ -423,8 +435,10 @@ function loadBudget(input){
         map[k]=(map[k]||0)+budget;
         if(!nameMap[k]&&name)nameMap[k]=name;
       }
-      // Clear overrides for replaced months
-      newMonths.forEach(mk=>{Object.keys(budgetOverrides).forEach(k=>{if(k.endsWith('||'+mk))delete budgetOverrides[k]})});
+      // NOTE: we intentionally do NOT clear budget overrides when re-uploading
+      // budget files. Overrides are manual adjustments that should persist
+      // unless the user explicitly clicks "Reset". This prevents budget edits
+      // from being wiped on every monthly upload.
       budgetRows=budgetRows.filter(r=>!newMonths.has(r.month));
       const newRows=Object.entries(map).map(([k,budget])=>{
         const[dept,coa,month]=k.split('||');
